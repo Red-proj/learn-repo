@@ -63,3 +63,29 @@ test('scene manager current returns current scene and step', async () => {
   assert.equal(currentAtStart, null);
   assert.deepEqual(currentAfterEnter, { id: 'demo', step: 0 });
 });
+
+test('enter options can seed and reset scene data', async () => {
+  const dp = createDispatcher();
+  const scenes = new SceneManager();
+  const seen = [];
+
+  scenes.registerScene('checkout', async (ctx, scene) => {
+    const data = await scene.getData();
+    seen.push(`${String(data.cart ?? '')}:${String(data.user ?? '')}`);
+    await scene.leave();
+  });
+  scenes.mount(dp);
+
+  dp.message([filters.command('start')], async (ctx) => {
+    await ctx.setData({ stale: 'x' });
+    await scenes.enter(ctx, 'checkout', {
+      data: { cart: 'c1', user: 'u1' },
+      resetData: true
+    });
+  });
+
+  await dp.handleUpdate(createMessageUpdate({ chatID: 'chat-1', text: '/start' }));
+  await dp.handleUpdate(createMessageUpdate({ chatID: 'chat-1', text: 'next' }));
+
+  assert.deepEqual(seen, ['c1:u1']);
+});

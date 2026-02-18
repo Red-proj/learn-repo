@@ -12,6 +12,12 @@ export interface SceneOptions {
   leave?: SceneHandler;
 }
 
+export interface SceneEnterOptions {
+  step?: number;
+  data?: FSMData;
+  resetData?: boolean;
+}
+
 interface BaseSceneDefinition extends SceneOptions {
   kind: 'scene' | 'wizard';
 }
@@ -99,10 +105,11 @@ export class SceneManager {
     });
   }
 
-  async enter(ctx: Context, id: string, step = 0): Promise<void> {
+  async enter(ctx: Context, id: string, stepOrOptions: number | SceneEnterOptions = 0): Promise<void> {
     const sceneID = normalizeSceneID(id);
     const target = this.scenes.get(sceneID);
     if (!target) throw new Error(`scene not found: ${sceneID}`);
+    const options = normalizeEnterOptions(stepOrOptions);
 
     const previous = parseSceneState(await ctx.getState());
     if (previous) {
@@ -112,9 +119,16 @@ export class SceneManager {
       }
     }
 
-    await ctx.setState(encodeSceneState(sceneID, step));
+    if (options.resetData) {
+      await ctx.clearData();
+    }
+    if (options.data) {
+      await ctx.updateData(options.data);
+    }
+
+    await ctx.setState(encodeSceneState(sceneID, options.step));
     if (target.enter) {
-      await target.enter(ctx, new SceneSession(ctx, sceneID, Math.max(0, step)));
+      await target.enter(ctx, new SceneSession(ctx, sceneID, Math.max(0, options.step)));
     }
   }
 
@@ -182,5 +196,16 @@ function parseSceneState(raw: string | undefined): ParsedState | null {
   return {
     sceneID,
     step: Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0
+  };
+}
+
+function normalizeEnterOptions(stepOrOptions: number | SceneEnterOptions): Required<Pick<SceneEnterOptions, 'step' | 'resetData'>> & Pick<SceneEnterOptions, 'data'> {
+  if (typeof stepOrOptions === 'number') {
+    return { step: Math.max(0, stepOrOptions), resetData: false };
+  }
+  return {
+    step: Math.max(0, stepOrOptions.step ?? 0),
+    data: stepOrOptions.data,
+    resetData: stepOrOptions.resetData ?? false
   };
 }

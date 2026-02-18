@@ -310,3 +310,12 @@ scenes.registerWizard('profile', [
   }
 ]);
 ```
+
+## 30. Enter scene with initial data
+
+```ts
+await scenes.enter(ctx, 'checkout', {
+  data: { cartID: 'c1' },
+  resetData: true
+});
+```

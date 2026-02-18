@@ -25,6 +25,7 @@
 - Added webhook secret token validation options.
 - Added `dropPendingUpdates` polling option.
 - Added scene session data helpers and `SceneManager.current(ctx)`.
+- Added scene enter options with initial data/reset support.
 
 ## v0.2.0 (2026-02-18)
 

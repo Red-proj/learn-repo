@@ -280,6 +280,14 @@ const data = await scene.getData<{ name?: string }>();
 await scene.updateData({ name: ctx.messageText() });
 ```
 
+```ts
+await scenes.enter(ctx, 'checkout', {
+  step: 0,
+  data: { cartID: 'c1' },
+  resetData: true
+});
+```
+
 ## Inline Buttons
 
 ```ts

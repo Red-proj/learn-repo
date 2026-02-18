@@ -53,6 +53,8 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added scene session data helpers:
   - `scene.getData()`, `scene.setData()`, `scene.updateData()`, `scene.clearData()`
   - `SceneManager.current(ctx)` for current scene/step inspection.
+- Added scene enter options:
+  - `scenes.enter(ctx, id, { step, data, resetData })`
 
 ## [v0.2.0] - 2026-02-18
 
