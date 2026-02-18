@@ -30,6 +30,7 @@ Status: `v0.2.0`.
 - Unhandled update hooks (`onUnhandled`, `onUnhandledFirst`)
 - Bot/Router fallback handler (`handleAny`)
 - Advanced command filters (`commandAny`, `commandFor`)
+- Batch update handling (`handleUpdates`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -263,6 +264,13 @@ dp.onUnhandled(async (ctx) => {
   await ctx.reply('No route matched this update');
   return true;
 });
+```
+
+## Batch Update Handling
+
+```ts
+const result = await dp.handleUpdates(updates, { concurrent: true });
+console.log(result.handled, result.total);
 ```
 
 ## Throttle Middleware

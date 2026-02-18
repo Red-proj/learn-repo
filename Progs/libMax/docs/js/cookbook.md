@@ -339,3 +339,10 @@ dp.message([filters.commandFor('start', 'mybot')], (ctx) => {
   return ctx.reply('start for mybot');
 });
 ```
+
+## 34. Handle update batches
+
+```ts
+const result = await dp.handleUpdates(updates, { concurrent: true });
+console.log(result.handled, result.total);
+```

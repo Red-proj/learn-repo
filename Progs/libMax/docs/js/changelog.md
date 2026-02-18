@@ -29,6 +29,7 @@
 - Added dispatcher unhandled update hooks.
 - Added classic bot/router fallback handler `handleAny`.
 - Added command mention filters (`commandAny`, `commandFor`).
+- Added batch update processing API (`handleUpdates`).
 
 ## v0.2.0 (2026-02-18)
 

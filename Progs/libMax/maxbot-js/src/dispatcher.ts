@@ -43,6 +43,10 @@ export interface DispatcherOptions {
   };
 }
 
+export interface HandleUpdatesOptions {
+  concurrent?: boolean;
+}
+
 export type FSMStrategy = 'chat' | 'user_in_chat' | 'user' | 'global';
 
 export class Dispatcher {
@@ -215,6 +219,22 @@ export class Dispatcher {
       : await this.runWithKeyQueue(orderKey, run);
     if (handled) return true;
     return await this.runUnhandled(ctx);
+  }
+
+  async handleUpdates(updates: Update[], options: HandleUpdatesOptions = {}): Promise<{ handled: number; total: number }> {
+    if (!options.concurrent) {
+      let handled = 0;
+      for (const update of updates) {
+        if (await this.handleUpdate(update)) handled += 1;
+      }
+      return { handled, total: updates.length };
+    }
+
+    const results = await Promise.all(updates.map((update) => this.handleUpdate(update)));
+    return {
+      handled: results.filter(Boolean).length,
+      total: updates.length
+    };
   }
 
   async startLongPolling(signal?: AbortSignal): Promise<void> {

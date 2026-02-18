@@ -32,6 +32,7 @@ Status: `v0.2.0`
 - Unhandled update hooks in dispatcher (`onUnhandled`)
 - Bot router fallback handler (`handleAny`)
 - Command mention filters (`commandAny`, `commandFor`)
+- Batch update processing (`handleUpdates`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

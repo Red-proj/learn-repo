@@ -143,4 +143,4 @@ go test ./...
 
 ## Stability
 
-- See `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-go/STABILITY.md` for API guarantees and migration notes.
+- See `Progs/maxbot-go/STABILITY.md` for API guarantees and migration notes.

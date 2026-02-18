@@ -65,6 +65,8 @@ All notable changes to `maxbot-js` are documented in this file.
   - `filters.commandAny(...)`
   - `filters.commandFor(command, username, { allowWithoutMention? })`
   - `ctx.isCommandFor(username, ...)`
+- Added batch update entrypoint:
+  - `dispatcher.handleUpdates(updates, { concurrent? })`
 
 ## [v0.2.0] - 2026-02-18
 
