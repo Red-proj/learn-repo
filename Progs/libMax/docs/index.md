@@ -16,4 +16,3 @@
 ## Repository
 
 - GitHub: [Red-proj/learn-repo](https://github.com/Red-proj/learn-repo)
-- Framework root: `Progs/libMax`

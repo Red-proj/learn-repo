@@ -5,8 +5,8 @@
 - `maxbot-go`: `go test ./...` passes.
 - `maxbot-js`: `npm run typecheck` and `npm run build` pass.
 - Changelogs reviewed:
-  - `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-go/CHANGELOG.md`
-  - `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-js/CHANGELOG.md`
+  - `Progs/maxbot-go/CHANGELOG.md`
+  - `Progs/maxbot-js/CHANGELOG.md`
 
 ## Suggested tags
 

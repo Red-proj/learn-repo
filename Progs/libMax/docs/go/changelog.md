@@ -15,7 +15,3 @@
 
 - Reliability defaults for retry/backoff and rate limiting
 - `Reply` works with callback-originated updates via `ChatID()`
-
-### Source
-
-- Full changelog: `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-go/CHANGELOG.md`

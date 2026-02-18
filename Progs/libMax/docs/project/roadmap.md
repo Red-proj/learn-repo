@@ -17,7 +17,3 @@ All planned phases are complete.
 ## Phase 4: maxbot-js (v0.2)
 
 - Done
-
-## Source
-
-- Full roadmap: `/Users/sergeyvishnykovjr./Progs/libMax/ROADMAP.md`

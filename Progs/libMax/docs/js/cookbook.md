@@ -58,7 +58,3 @@ const { client } = createMockClient({
   handler: (url) => url.endsWith('/updates') ? updatesResponse([createMessageUpdate({ text: '/start' })]) : { status: 200, json: { ok: true } }
 });
 ```
-
-## Source
-
-- Full cookbook: `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-js/COOKBOOK.md`

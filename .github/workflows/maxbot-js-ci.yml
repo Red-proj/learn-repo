@@ -3,11 +3,11 @@ name: maxbot-js CI
 on:
   push:
     paths:
-      - 'maxbot-js/**'
+      - 'Progs/libMax/maxbot-js/**'
       - '.github/workflows/maxbot-js-ci.yml'
   pull_request:
     paths:
-      - 'maxbot-js/**'
+      - 'Progs/libMax/maxbot-js/**'
       - '.github/workflows/maxbot-js-ci.yml'
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: maxbot-js
+        working-directory: Progs/libMax/maxbot-js
     steps:
       - name: Checkout
         uses: actions/checkout@v4

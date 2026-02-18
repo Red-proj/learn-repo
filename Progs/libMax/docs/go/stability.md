@@ -25,7 +25,3 @@ No mandatory changes if you use:
 - Context helpers
 - Media endpoints
 - Pluggable logger
-
-## Source
-
-- `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-go/STABILITY.md`

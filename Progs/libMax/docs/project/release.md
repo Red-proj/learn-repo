@@ -20,7 +20,3 @@ git tag -a maxbot-js/v0.2.0 -m "maxbot-js v0.2.0"
 git push origin maxbot-go/v0.2.0
 git push origin maxbot-js/v0.2.0
 ```
-
-## Source
-
-- Full checklist: `/Users/sergeyvishnykovjr./Progs/libMax/RELEASE_CHECKLIST.md`

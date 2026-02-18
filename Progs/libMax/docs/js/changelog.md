@@ -11,7 +11,3 @@
 - Testkit and mocks
 - Cookbook docs
 - CI for typecheck/build
-
-### Source
-
-- Full changelog: `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-js/CHANGELOG.md`

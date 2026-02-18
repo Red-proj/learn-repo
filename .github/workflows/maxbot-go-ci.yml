@@ -3,11 +3,11 @@ name: maxbot-go CI
 on:
   push:
     paths:
-      - 'maxbot-go/**'
+      - 'Progs/libMax/maxbot-go/**'
       - '.github/workflows/maxbot-go-ci.yml'
   pull_request:
     paths:
-      - 'maxbot-go/**'
+      - 'Progs/libMax/maxbot-go/**'
       - '.github/workflows/maxbot-go-ci.yml'
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: maxbot-go
+        working-directory: Progs/libMax/maxbot-go
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: maxbot-go/go.mod
+          go-version-file: Progs/libMax/maxbot-go/go.mod
 
       - name: Test
         run: go test ./...
