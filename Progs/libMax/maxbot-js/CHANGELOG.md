@@ -55,6 +55,9 @@ All notable changes to `maxbot-js` are documented in this file.
   - `SceneManager.current(ctx)` for current scene/step inspection.
 - Added scene enter options:
   - `scenes.enter(ctx, id, { step, data, resetData })`
+- Added dispatcher unhandled update hooks:
+  - `onUnhandled(...)`
+  - `onUnhandledFirst(...)`
 
 ## [v0.2.0] - 2026-02-18
 

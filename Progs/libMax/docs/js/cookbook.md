@@ -319,3 +319,9 @@ await scenes.enter(ctx, 'checkout', {
   resetData: true
 });
 ```
+
+## 31. Unhandled update fallback
+
+```ts
+dp.onUnhandled((ctx) => ctx.reply('Unknown command or update'));
+```

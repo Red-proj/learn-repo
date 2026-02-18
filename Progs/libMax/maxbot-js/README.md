@@ -27,6 +27,7 @@ Status: `v0.2.0`.
 - Webhook secret token validation (`secretToken`, `secretHeaderName`)
 - Polling backlog skip on startup (`dropPendingUpdates`)
 - Scene data/session helpers and `SceneManager.current(...)`
+- Unhandled update hooks (`onUnhandled`, `onUnhandledFirst`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -246,6 +247,15 @@ dp.onError((error, ctx) => {
 ```
 
 `onError` also catches failures from filters and metadata resolvers (`useMeta`).
+
+## Unhandled Updates
+
+```ts
+dp.onUnhandled(async (ctx) => {
+  await ctx.reply('No route matched this update');
+  return true;
+});
+```
 
 ## Throttle Middleware
 

@@ -29,6 +29,7 @@ Status: `v0.2.0`
 - Polling option `dropPendingUpdates` to skip old backlog on startup
 - Scene session data helpers and `SceneManager.current(...)`
 - Scene enter options with initial data (`enter(..., { data, resetData })`)
+- Unhandled update hooks in dispatcher (`onUnhandled`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

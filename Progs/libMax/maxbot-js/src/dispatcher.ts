@@ -10,6 +10,7 @@ export type DispatchMiddleware = (next: DispatchHandler) => DispatchHandler;
 export type DispatchErrorHandler = (error: unknown, ctx: Context) => Promise<boolean | void> | boolean | void;
 export type DispatchOrderStrategy = 'none' | 'chat' | 'user' | 'fsm';
 export type DispatchLifecycleHandler = (dp: Dispatcher) => Promise<void> | void;
+export type DispatchUnhandledHandler = (ctx: Context) => Promise<boolean | void> | boolean | void;
 
 export class DispatchTimeoutError extends Error {
   readonly timeoutMs: number;
@@ -63,6 +64,7 @@ export class Dispatcher {
   private readonly pending = new Set<Promise<unknown>>();
   private readonly startupHandlers: DispatchLifecycleHandler[] = [];
   private readonly shutdownHandlers: DispatchLifecycleHandler[] = [];
+  private readonly unhandledHandlers: DispatchUnhandledHandler[] = [];
   private lifecycleStarted = false;
 
   constructor(clientOrConfig: Client | ClientConfig, options: DispatcherOptions = {}) {
@@ -127,6 +129,14 @@ export class Dispatcher {
 
   onShutdown(handler: DispatchLifecycleHandler): void {
     this.shutdownHandlers.push(handler);
+  }
+
+  onUnhandled(handler: DispatchUnhandledHandler): void {
+    this.unhandledHandlers.push(handler);
+  }
+
+  onUnhandledFirst(handler: DispatchUnhandledHandler): void {
+    this.unhandledHandlers.unshift(handler);
   }
 
   message(handler: DispatchHandler): void;
@@ -200,10 +210,11 @@ export class Dispatcher {
     const ctx = new Context(this.client, update, this.stateAccessor(), {}, resolveFSMKey(update, this.fsmStrategy));
     const run = () => this.dispatchWithTimeout(update, ctx);
     const orderKey = resolveOrderKey(update, ctx, this.orderedBy, this.fsmStrategy);
-    if (!orderKey) {
-      return await this.runWithConcurrency(run);
-    }
-    return await this.runWithKeyQueue(orderKey, run);
+    const handled = !orderKey
+      ? await this.runWithConcurrency(run)
+      : await this.runWithKeyQueue(orderKey, run);
+    if (handled) return true;
+    return await this.runUnhandled(ctx);
   }
 
   async startLongPolling(signal?: AbortSignal): Promise<void> {
@@ -454,6 +465,15 @@ export class Dispatcher {
       await wait(10);
     }
     return true;
+  }
+
+  private async runUnhandled(ctx: Context): Promise<boolean> {
+    for (const handler of this.unhandledHandlers) {
+      if ((await handler(ctx)) === true) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private async drainPendingUpdates(offset: number, signal?: AbortSignal): Promise<number> {
