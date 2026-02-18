@@ -50,6 +50,9 @@ All notable changes to `maxbot-js` are documented in this file.
   - `createExpressWebhookHandler(..., { secretToken, secretHeaderName })`
   - `createFastifyWebhookHandler(..., { secretToken, secretHeaderName })`
 - Added `polling.dropPendingUpdates` to skip old queued updates on startup.
+- Added scene session data helpers:
+  - `scene.getData()`, `scene.setData()`, `scene.updateData()`, `scene.clearData()`
+  - `SceneManager.current(ctx)` for current scene/step inspection.
 
 ## [v0.2.0] - 2026-02-18
 

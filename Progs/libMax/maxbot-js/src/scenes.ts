@@ -1,5 +1,6 @@
 import type { Context } from './context';
 import type { DispatchRouter } from './dispatcher-router';
+import type { FSMData } from './fsm';
 import { filters } from './filters';
 
 const SCENE_STATE_PREFIX = '__scene:';
@@ -58,6 +59,22 @@ export class SceneSession {
   async leave(): Promise<void> {
     await this.ctx.clearState();
   }
+
+  async getData<TData extends FSMData = FSMData>(): Promise<TData> {
+    return await this.ctx.getData<TData>();
+  }
+
+  async setData(data: FSMData): Promise<void> {
+    await this.ctx.setData(data);
+  }
+
+  async updateData(patch: FSMData): Promise<void> {
+    await this.ctx.updateData(patch);
+  }
+
+  async clearData(): Promise<void> {
+    await this.ctx.clearData();
+  }
 }
 
 export class SceneManager {
@@ -109,6 +126,12 @@ export class SceneManager {
       await target.leave(ctx, new SceneSession(ctx, current.sceneID, current.step));
     }
     await ctx.clearState();
+  }
+
+  async current(ctx: Context): Promise<{ id: string; step: number } | null> {
+    const parsed = parseSceneState(await ctx.getState());
+    if (!parsed) return null;
+    return { id: parsed.sceneID, step: parsed.step };
   }
 
   async handle(ctx: Context): Promise<boolean> {

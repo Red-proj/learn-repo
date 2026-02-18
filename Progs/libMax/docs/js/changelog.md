@@ -24,6 +24,7 @@
 - Improved `onError` to catch filter and `useMeta` resolver failures.
 - Added webhook secret token validation options.
 - Added `dropPendingUpdates` polling option.
+- Added scene session data helpers and `SceneManager.current(ctx)`.
 
 ## v0.2.0 (2026-02-18)
 

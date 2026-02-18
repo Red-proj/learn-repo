@@ -27,6 +27,7 @@ Status: `v0.2.0`
 - Error hooks also catch filter/useMeta failures
 - Webhook secret token validation in Bot/Express/Fastify adapters
 - Polling option `dropPendingUpdates` to skip old backlog on startup
+- Scene session data helpers and `SceneManager.current(...)`
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

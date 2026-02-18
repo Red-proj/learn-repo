@@ -26,6 +26,7 @@ Status: `v0.2.0`.
 - Polling recovery backoff (`recoverErrors`, `errorDelayMs`, `maxErrorDelayMs`)
 - Webhook secret token validation (`secretToken`, `secretHeaderName`)
 - Polling backlog skip on startup (`dropPendingUpdates`)
+- Scene data/session helpers and `SceneManager.current(...)`
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -271,6 +272,12 @@ const scenes = new SceneManager();
 
 scenes.mount(feature);
 dp.includeRouter(feature);
+```
+
+```ts
+// inside scene handler:
+const data = await scene.getData<{ name?: string }>();
+await scene.updateData({ name: ctx.messageText() });
 ```
 
 ## Inline Buttons

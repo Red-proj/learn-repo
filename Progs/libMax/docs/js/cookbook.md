@@ -294,3 +294,19 @@ const dp = new Dispatcher({
   }
 });
 ```
+
+## 29. Scene session data
+
+```ts
+scenes.registerWizard('profile', [
+  async (ctx, scene) => {
+    await scene.setData({ name: ctx.messageText() });
+    await scene.next();
+  },
+  async (ctx, scene) => {
+    const data = await scene.getData<{ name?: string }>();
+    await ctx.reply(`name=${data.name ?? ''}`);
+    await scene.leave();
+  }
+]);
+```
