@@ -1,0 +1,35 @@
+name: maxbot-js CI
+
+on:
+  push:
+    paths:
+      - 'maxbot-js/**'
+      - '.github/workflows/maxbot-js-ci.yml'
+  pull_request:
+    paths:
+      - 'maxbot-js/**'
+      - '.github/workflows/maxbot-js-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: maxbot-js
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
