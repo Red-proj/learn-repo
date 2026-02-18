@@ -17,6 +17,7 @@ Status: `v0.2.0`.
 - Built-in dispatch middleware helpers (`createThrottleMiddleware`)
 - State groups for FSM (`createStateGroup`)
 - FSM strategy selection (`chat`, `user_in_chat`, `user`, `global`)
+- Identity filters (`filters.chatID`, `filters.userID`, `filters.chatType`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -135,6 +136,14 @@ dp.message([filters.regexMatch(/^\/ban\s+(\w+)$/i, 'banMatch')], (ctx) => {
 dp.message([filters.commandMatch('ban', 'cmd')], (ctx) => {
   const cmd = ctx.meta<{ args: string[]; argsText: string }>('cmd');
   return ctx.reply(`ban target=${cmd?.args[0] ?? ''} reason=${cmd?.argsText ?? ''}`);
+});
+```
+
+## Identity Filters
+
+```ts
+dp.message([filters.chatID('admins-chat'), filters.userID('owner-user')], (ctx) => {
+  return ctx.reply(`admin command from ${ctx.userID()}`);
 });
 ```
 

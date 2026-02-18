@@ -29,6 +29,21 @@ export const filters = {
     return (ctx) => ctx.messageText() === expected;
   },
 
+  chatID(...ids: string[]): Filter {
+    const allowed = new Set(ids.map((x) => x.trim()).filter(Boolean));
+    return (ctx) => allowed.has(ctx.chatID());
+  },
+
+  userID(...ids: string[]): Filter {
+    const allowed = new Set(ids.map((x) => x.trim()).filter(Boolean));
+    return (ctx) => allowed.has(ctx.userID());
+  },
+
+  chatType(...types: string[]): Filter {
+    const allowed = new Set(types.map((x) => x.trim().toLowerCase()).filter(Boolean));
+    return (ctx) => allowed.has(ctx.chatType().toLowerCase());
+  },
+
   regex(pattern: RegExp): Filter {
     return (ctx) => pattern.test(ctx.messageText());
   },

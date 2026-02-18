@@ -196,3 +196,11 @@ const dp = new Dispatcher({
   fsmStrategy: 'user_in_chat'
 });
 ```
+
+## 20. Route by chat and user
+
+```ts
+dp.message([filters.chatID('admins-chat'), filters.userID('owner-user')], (ctx) => {
+  return ctx.reply('admin-only');
+});
+```

@@ -22,6 +22,8 @@ All notable changes to `maxbot-js` are documented in this file.
 - Exported middleware helpers with `createThrottleMiddleware(...)`.
 - Added `createStateGroup(...)` helper for structured FSM state naming.
 - Added FSM strategy option in dispatcher: `fsmStrategy` (`chat`, `user_in_chat`, `user`, `global`).
+- Added identity helpers in context: `ctx.userID()` and `ctx.chatType()`.
+- Added filters: `filters.chatID(...)`, `filters.userID(...)`, `filters.chatType(...)`.
 
 ## [v0.2.0] - 2026-02-18
 

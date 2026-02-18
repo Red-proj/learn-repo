@@ -106,6 +106,14 @@ export class Context {
     return this.update.message?.chat.chat_id ?? this.update.callback_query?.chat?.chat_id ?? this.update.callback_query?.message?.chat.chat_id ?? '';
   }
 
+  userID(): ID | '' {
+    return this.update.message?.sender?.user_id ?? this.update.callback_query?.from?.user_id ?? this.update.callback_query?.message?.sender?.user_id ?? '';
+  }
+
+  chatType(): string {
+    return this.update.message?.chat.type ?? this.update.callback_query?.chat?.type ?? this.update.callback_query?.message?.chat.type ?? '';
+  }
+
   meta<TValue = unknown>(key: string): TValue | undefined {
     return this.runtimeMeta[key] as TValue | undefined;
   }

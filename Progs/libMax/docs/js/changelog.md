@@ -14,6 +14,7 @@
 - Added middleware helper `createThrottleMiddleware(...)`.
 - Added FSM helper `createStateGroup(...)`.
 - Added dispatcher `fsmStrategy` for chat/user/global state scoping.
+- Added identity filters and context helpers (`chatID/userID/chatType` routing).
 
 ## v0.2.0 (2026-02-18)
 

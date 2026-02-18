@@ -17,6 +17,7 @@ Status: `v0.2.0`
 - Middleware helper: `createThrottleMiddleware(...)`
 - FSM state groups: `createStateGroup(...)`
 - FSM keying strategies via `Dispatcher({ fsmStrategy })`
+- Identity routing filters (`chatID`, `userID`, `chatType`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
@@ -63,6 +64,7 @@ dp.includeRouters(admin);
 - `filters.callbackDataRegex(...)` for callback matching
 - `createStateGroup(...)` for typed state naming
 - `fsmStrategy` to scope state by chat/user/global
+- `filters.chatID/userID/chatType` for access control routing
 
 ## Next
 
