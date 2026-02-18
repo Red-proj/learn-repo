@@ -10,6 +10,7 @@ export * from './filters';
 export * from './dispatcher';
 export * from './dispatcher-router';
 export * from './fsm';
+export * from './state-group';
 export * from './scenes';
 export * from './middlewares';
 export * from './keyboard';

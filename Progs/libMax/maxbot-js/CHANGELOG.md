@@ -20,6 +20,7 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added `ctx.commandInfo()` for structured command parsing (`name`, `mention`, `argsText`, `args`).
 - Added `filters.commandMatch(...)` to route by command and inject parsed command into metadata.
 - Exported middleware helpers with `createThrottleMiddleware(...)`.
+- Added `createStateGroup(...)` helper for structured FSM state naming.
 
 ## [v0.2.0] - 2026-02-18
 

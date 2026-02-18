@@ -15,6 +15,7 @@ Status: `v0.2.0`.
 - Data filters (`filters.regexMatch`, object-returning custom filters)
 - Structured command filter (`filters.commandMatch`) + `ctx.commandInfo()`
 - Built-in dispatch middleware helpers (`createThrottleMiddleware`)
+- State groups for FSM (`createStateGroup`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -132,6 +133,22 @@ dp.message([filters.regexMatch(/^\/ban\s+(\w+)$/i, 'banMatch')], (ctx) => {
 dp.message([filters.commandMatch('ban', 'cmd')], (ctx) => {
   const cmd = ctx.meta<{ args: string[]; argsText: string }>('cmd');
   return ctx.reply(`ban target=${cmd?.args[0] ?? ''} reason=${cmd?.argsText ?? ''}`);
+});
+```
+
+## State Group For FSM
+
+```ts
+const Signup = createStateGroup('signup', ['name', 'age']);
+
+dp.message([filters.command('start')], async (ctx) => {
+  await ctx.setState(Signup.states.name);
+  await ctx.reply('Your name?');
+});
+
+dp.message([filters.state(Signup.states.name)], async (ctx) => {
+  await ctx.setState(Signup.states.age);
+  await ctx.reply(`Hi ${ctx.messageText()}, your age?`);
 });
 ```
 

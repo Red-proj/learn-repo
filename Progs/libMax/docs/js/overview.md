@@ -15,6 +15,7 @@ Status: `v0.2.0`
 - Filters can emit metadata into context (`regexMatch` / object result)
 - Structured command parsing via `ctx.commandInfo()` and `filters.commandMatch(...)`
 - Middleware helper: `createThrottleMiddleware(...)`
+- FSM state groups: `createStateGroup(...)`
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
@@ -59,6 +60,7 @@ dp.includeRouters(admin);
 - `ctx.commandInfo()` for structured command metadata
 - `createCallbackData(...).filter(...)` for callback-query routing
 - `filters.callbackDataRegex(...)` for callback matching
+- `createStateGroup(...)` for typed state naming
 
 ## Next
 

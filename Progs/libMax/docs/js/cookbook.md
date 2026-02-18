@@ -177,3 +177,12 @@ dp.use(
   })
 );
 ```
+
+## 18. State group for FSM
+
+```ts
+const Signup = createStateGroup('signup', ['name', 'age']);
+
+dp.message([filters.command('start')], (ctx) => ctx.setState(Signup.states.name));
+dp.message([filters.state(Signup.states.name)], (ctx) => ctx.setState(Signup.states.age));
+```
