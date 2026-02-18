@@ -214,3 +214,19 @@ dp.message([filters.stateGroup(Signup)], (ctx) => {
   return ctx.reply(`flow message: ${ctx.messageText()}`);
 });
 ```
+
+## 22. Concurrency and graceful stop
+
+```ts
+const dp = new Dispatcher({
+  token,
+  baseURL,
+  processing: {
+    maxInFlight: 32,
+    orderedBy: 'chat',
+    handlerTimeoutMs: 15_000
+  }
+});
+
+await dp.gracefulStop({ timeoutMs: 10_000 });
+```

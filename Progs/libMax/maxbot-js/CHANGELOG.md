@@ -25,6 +25,11 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added identity helpers in context: `ctx.userID()` and `ctx.chatType()`.
 - Added filters: `filters.chatID(...)`, `filters.userID(...)`, `filters.chatType(...)`.
 - Added grouped FSM filters: `filters.stateIn(...)` and `filters.stateGroup(...)`.
+- Added dispatcher processing controls:
+  - `processing.maxInFlight`
+  - `processing.orderedBy` (`none`, `chat`, `user`, `fsm`)
+  - `processing.handlerTimeoutMs`
+  - `gracefulStop(...)` with optional timeout.
 
 ## [v0.2.0] - 2026-02-18
 

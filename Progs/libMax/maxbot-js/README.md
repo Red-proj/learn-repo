@@ -19,6 +19,7 @@ Status: `v0.2.0`.
 - FSM strategy selection (`chat`, `user_in_chat`, `user`, `global`)
 - Identity filters (`filters.chatID`, `filters.userID`, `filters.chatType`)
 - Group state filters (`filters.stateIn`, `filters.stateGroup`)
+- Processing controls (`maxInFlight`, `orderedBy`, `handlerTimeoutMs`, `gracefulStop`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -65,7 +66,12 @@ import { Dispatcher, filters } from 'maxbot-js';
 const dp = new Dispatcher({
   token: process.env.BOT_TOKEN!,
   baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru',
-  fsmStrategy: 'chat'
+  fsmStrategy: 'chat',
+  processing: {
+    maxInFlight: 32,
+    orderedBy: 'chat',
+    handlerTimeoutMs: 15_000
+  }
 });
 
 dp.message([filters.command('start')], async (ctx) => {
@@ -178,6 +184,23 @@ const dp = new Dispatcher({
   baseURL: process.env.MAX_API_BASE_URL!,
   fsmStrategy: 'user_in_chat'
 });
+```
+
+## Processing Controls
+
+```ts
+const dp = new Dispatcher({
+  token: process.env.BOT_TOKEN!,
+  baseURL: process.env.MAX_API_BASE_URL!,
+  processing: {
+    maxInFlight: 32,
+    orderedBy: 'chat',
+    handlerTimeoutMs: 15_000,
+    gracefulShutdownMs: 10_000
+  }
+});
+
+await dp.gracefulStop();
 ```
 
 ## Error Handling

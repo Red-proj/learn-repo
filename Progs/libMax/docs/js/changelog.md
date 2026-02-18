@@ -16,6 +16,7 @@
 - Added dispatcher `fsmStrategy` for chat/user/global state scoping.
 - Added identity filters and context helpers (`chatID/userID/chatType` routing).
 - Added grouped FSM filters: `stateIn(...)` and `stateGroup(...)`.
+- Added dispatcher processing controls (`maxInFlight`, `orderedBy`, timeout, `gracefulStop`).
 
 ## v0.2.0 (2026-02-18)
 

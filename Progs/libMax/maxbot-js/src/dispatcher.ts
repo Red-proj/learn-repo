@@ -8,6 +8,17 @@ import type { ID, Update } from './types';
 export type DispatchHandler = (ctx: Context) => Promise<void> | void;
 export type DispatchMiddleware = (next: DispatchHandler) => DispatchHandler;
 export type DispatchErrorHandler = (error: unknown, ctx: Context) => Promise<boolean | void> | boolean | void;
+export type DispatchOrderStrategy = 'none' | 'chat' | 'user' | 'fsm';
+
+export class DispatchTimeoutError extends Error {
+  readonly timeoutMs: number;
+
+  constructor(timeoutMs: number) {
+    super(`dispatch handler timed out after ${timeoutMs}ms`);
+    this.name = 'DispatchTimeoutError';
+    this.timeoutMs = timeoutMs;
+  }
+}
 
 export interface DispatcherOptions {
   polling?: {
@@ -18,6 +29,12 @@ export interface DispatcherOptions {
   };
   fsmStorage?: FSMStorage;
   fsmStrategy?: FSMStrategy;
+  processing?: {
+    maxInFlight?: number;
+    orderedBy?: DispatchOrderStrategy;
+    handlerTimeoutMs?: number;
+    gracefulShutdownMs?: number;
+  };
 }
 
 export type FSMStrategy = 'chat' | 'user_in_chat' | 'user' | 'global';
@@ -27,13 +44,26 @@ export class Dispatcher {
   readonly router: DispatchRouter;
   private readonly state: FSMStorage;
   private readonly fsmStrategy: FSMStrategy;
+  private readonly maxInFlight: number;
+  private readonly orderedBy: DispatchOrderStrategy;
+  private readonly handlerTimeoutMs?: number;
+  private readonly gracefulShutdownMs?: number;
   private readonly polling: Required<NonNullable<DispatcherOptions['polling']>>;
+  private stopping = false;
+  private inFlight = 0;
+  private readonly waiters: Array<() => void> = [];
+  private readonly keyedTails = new Map<string, Promise<void>>();
+  private readonly pending = new Set<Promise<unknown>>();
 
   constructor(clientOrConfig: Client | ClientConfig, options: DispatcherOptions = {}) {
     this.client = clientOrConfig instanceof Client ? clientOrConfig : new Client(clientOrConfig);
     this.router = new DispatchRouter();
     this.state = options.fsmStorage ?? new MemoryFSMStorage();
     this.fsmStrategy = options.fsmStrategy ?? 'chat';
+    this.maxInFlight = normalizeMaxInFlight(options.processing?.maxInFlight);
+    this.orderedBy = options.processing?.orderedBy ?? 'none';
+    this.handlerTimeoutMs = normalizeTimeout(options.processing?.handlerTimeoutMs);
+    this.gracefulShutdownMs = normalizeTimeout(options.processing?.gracefulShutdownMs);
     this.polling = {
       offset: options.polling?.offset ?? 0,
       limit: options.polling?.limit ?? 100,
@@ -141,14 +171,20 @@ export class Dispatcher {
   }
 
   async handleUpdate(update: Update): Promise<boolean> {
+    if (this.stopping) return false;
     const ctx = new Context(this.client, update, this.stateAccessor(), {}, resolveFSMKey(update, this.fsmStrategy));
-    return await this.router.dispatch(update, ctx);
+    const run = () => this.dispatchWithTimeout(update, ctx);
+    const orderKey = resolveOrderKey(update, ctx, this.orderedBy, this.fsmStrategy);
+    if (!orderKey) {
+      return await this.runWithConcurrency(run);
+    }
+    return await this.runWithKeyQueue(orderKey, run);
   }
 
   async startLongPolling(signal?: AbortSignal): Promise<void> {
     let offset = this.polling.offset;
 
-    while (!signal?.aborted) {
+    while (!signal?.aborted && !this.stopping) {
       const updates = await this.client.getUpdates(
         {
           offset,
@@ -170,6 +206,14 @@ export class Dispatcher {
         await this.handleUpdate(update);
       }
     }
+
+    await this.gracefulStop({ timeoutMs: this.gracefulShutdownMs });
+  }
+
+  async gracefulStop(options: { timeoutMs?: number } = {}): Promise<boolean> {
+    this.stopping = true;
+    const timeoutMs = normalizeTimeout(options.timeoutMs) ?? this.gracefulShutdownMs;
+    return await this.waitForDrain(timeoutMs);
   }
 
   async getState(chatID: ID): Promise<string | undefined> {
@@ -212,6 +256,93 @@ export class Dispatcher {
       clearData: (chatID) => this.state.clearData(chatID)
     };
   }
+
+  private async runWithKeyQueue(key: string, run: () => Promise<boolean>): Promise<boolean> {
+    const prev = this.keyedTails.get(key) ?? Promise.resolve();
+    const current = prev.catch(() => undefined).then(() => this.runWithConcurrency(run));
+    const tail = current.then(() => undefined, () => undefined);
+    this.keyedTails.set(key, tail);
+    tail.finally(() => {
+      if (this.keyedTails.get(key) === tail) {
+        this.keyedTails.delete(key);
+      }
+    });
+    return await current;
+  }
+
+  private async runWithConcurrency(run: () => Promise<boolean>): Promise<boolean> {
+    await this.acquireSlot();
+    const task = (async () => {
+      try {
+        return await run();
+      } finally {
+        this.releaseSlot();
+      }
+    })();
+    this.pending.add(task);
+    task.then(() => {
+      this.pending.delete(task);
+    }, () => {
+      this.pending.delete(task);
+    });
+    return await task;
+  }
+
+  private async dispatchWithTimeout(update: Update, ctx: Context): Promise<boolean> {
+    const work = this.router.dispatch(update, ctx);
+    if (!this.handlerTimeoutMs) {
+      return await work;
+    }
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timedOut = false;
+    const guardedWork = work.catch((error) => {
+      if (timedOut) return false;
+      throw error;
+    });
+    try {
+      return await Promise.race([
+        guardedWork,
+        new Promise<boolean>((_, reject) => {
+          timer = setTimeout(() => {
+            timedOut = true;
+            reject(new DispatchTimeoutError(this.handlerTimeoutMs as number));
+          }, this.handlerTimeoutMs);
+        })
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  private async acquireSlot(): Promise<void> {
+    if (this.inFlight < this.maxInFlight) {
+      this.inFlight += 1;
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      this.waiters.push(resolve);
+    });
+    this.inFlight += 1;
+  }
+
+  private releaseSlot(): void {
+    this.inFlight = Math.max(0, this.inFlight - 1);
+    const wake = this.waiters.shift();
+    if (wake) wake();
+  }
+
+  private async waitForDrain(timeoutMs?: number): Promise<boolean> {
+    const startedAt = Date.now();
+    while (this.inFlight > 0 || this.pending.size > 0) {
+      if (timeoutMs !== undefined && Date.now() - startedAt >= timeoutMs) {
+        return false;
+      }
+      await wait(10);
+    }
+    return true;
+  }
 }
 
 function wait(ms: number, signal?: AbortSignal): Promise<void> {
@@ -245,4 +376,27 @@ function resolveFSMKey(update: Update, strategy: FSMStrategy): ID | '' {
     return `${chatID}:${userID}`;
   }
   return chatID;
+}
+
+function normalizeMaxInFlight(value: number | undefined): number {
+  if (value === undefined) return 1;
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error('processing.maxInFlight must be > 0');
+  }
+  return Math.floor(value);
+}
+
+function normalizeTimeout(value: number | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error('timeout must be > 0');
+  }
+  return Math.floor(value);
+}
+
+function resolveOrderKey(update: Update, ctx: Context, strategy: DispatchOrderStrategy, fsmStrategy: FSMStrategy): string {
+  if (strategy === 'none') return '';
+  if (strategy === 'chat') return String(ctx.chatID() || '');
+  if (strategy === 'user') return String(ctx.userID() || '');
+  return String(resolveFSMKey(update, fsmStrategy) || '');
 }

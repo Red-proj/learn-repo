@@ -19,6 +19,7 @@ Status: `v0.2.0`
 - FSM keying strategies via `Dispatcher({ fsmStrategy })`
 - Identity routing filters (`chatID`, `userID`, `chatType`)
 - Group state filters (`stateIn`, `stateGroup`)
+- Dispatcher processing controls (`maxInFlight`, `orderedBy`, timeout, graceful stop)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
@@ -67,6 +68,7 @@ dp.includeRouters(admin);
 - `fsmStrategy` to scope state by chat/user/global
 - `filters.chatID/userID/chatType` for access control routing
 - `filters.stateIn/stateGroup` for multi-state routing
+- `processing` options for concurrency, ordering and timeouts
 
 ## Next
 
