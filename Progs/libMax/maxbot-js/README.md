@@ -319,17 +319,20 @@ await scenes.enter(ctx, 'checkout', {
 ```ts
 import { InlineKeyboardBuilder, createCallbackData } from 'maxbot-js';
 
-const cb = createCallbackData<{ action: string; id: string }>('item');
+const cb = createCallbackData<{ action: string; id: number }>('item', {
+  codecs: { id: 'number' },
+  metaKey: 'itemCB'
+});
 const keyboard = new InlineKeyboardBuilder()
-  .button('Open', { callbackData: cb.pack({ action: 'open', id: '42' }) })
+  .button('Open', { callbackData: cb.pack({ action: 'open', id: 42 }) })
   .row()
   .build();
 
 await ctx.reply('Выбери действие', { replyMarkup: keyboard });
 
 dp.callbackQuery([cb.filter({ action: 'open' })], async (ctx) => {
-  const parsed = cb.unpack(ctx.callbackData());
-  await ctx.reply(`open id=${parsed?.id ?? ''}`);
+  const parsed = ctx.meta('itemCB');
+  await ctx.reply(`open id=${parsed?.id ?? 0}`);
 });
 ```
 

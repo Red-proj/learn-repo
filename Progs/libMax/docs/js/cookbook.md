@@ -44,10 +44,14 @@ bot.use((next) => async (ctx) => {
 ## 5. Callback-data filter
 
 ```ts
-const cb = createCallbackData<{ action: string; id: string }>('item');
+const cb = createCallbackData<{ action: string; id: number }>('item', {
+  codecs: { id: 'number' },
+  metaKey: 'itemCB'
+});
+
 dp.callbackQuery([cb.filter({ action: 'open' })], async (ctx) => {
-  const data = cb.unpack(ctx.callbackData());
-  await ctx.reply(`open id=${data?.id ?? ''}`);
+  const data = ctx.meta('itemCB');
+  await ctx.reply(`open id=${data?.id ?? 0}`);
 });
 ```
 

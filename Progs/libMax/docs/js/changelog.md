@@ -30,6 +30,7 @@
 - Added classic bot/router fallback handler `handleAny`.
 - Added command mention filters (`commandAny`, `commandFor`).
 - Added batch update processing API (`handleUpdates`).
+- Improved callback-data helper with typed codecs and metadata injection from `filter(...)`.
 
 ## v0.2.0 (2026-02-18)
 

@@ -67,6 +67,9 @@ All notable changes to `maxbot-js` are documented in this file.
   - `ctx.isCommandFor(username, ...)`
 - Added batch update entrypoint:
   - `dispatcher.handleUpdates(updates, { concurrent? })`
+- Improved callback-data factory:
+  - typed `unpack` with codecs (`string|number|boolean|custom`)
+  - `cb.filter(...)` now injects parsed payload into `ctx.meta(...)`
 
 ## [v0.2.0] - 2026-02-18
 

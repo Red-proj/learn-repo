@@ -33,6 +33,7 @@ Status: `v0.2.0`
 - Bot router fallback handler (`handleAny`)
 - Command mention filters (`commandAny`, `commandFor`)
 - Batch update processing (`handleUpdates`)
+- Typed callback-data codecs + meta injection from `cb.filter(...)`
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
@@ -75,7 +76,7 @@ dp.includeRouters(admin);
 
 - `ctx.commandArgs()` to parse command arguments
 - `ctx.commandInfo()` for structured command metadata
-- `createCallbackData(...).filter(...)` for callback-query routing
+- `createCallbackData(..., { codecs }).filter(...)` for typed callback-query routing
 - `filters.callbackDataRegex(...)` for callback matching
 - `createStateGroup(...)` for typed state naming
 - `fsmStrategy` to scope state by chat/user/global
