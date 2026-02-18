@@ -25,6 +25,7 @@ Status: `v0.2.0`
 - Dispatcher lifecycle hooks: `onStartup`, `onShutdown`
 - Polling recovery/backoff options for transient network failures
 - Error hooks also catch filter/useMeta failures
+- Webhook secret token validation in Bot/Express/Fastify adapters
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

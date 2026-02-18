@@ -13,6 +13,8 @@ export interface PollingOptions {
 export interface WebhookOptions {
   addr?: string;
   path?: string;
+  secretToken?: string;
+  secretHeaderName?: string;
   handleInBackground?: boolean;
   onDispatchError?: (error: unknown, update: Update) => void | Promise<void>;
 }
@@ -122,6 +124,13 @@ export class Bot {
       return;
     }
 
+    const secretHeaderName = normalizeHeaderName(options.secretHeaderName ?? 'x-max-bot-secret-token');
+    if (!isSecretValid(options.secretToken, req.headers[secretHeaderName])) {
+      res.writeHead(401);
+      res.end('unauthorized');
+      return;
+    }
+
     const chunks: Buffer[] = [];
     for await (const chunk of req) {
       chunks.push(chunk as Buffer);
@@ -203,4 +212,19 @@ function closeServer(server: ReturnType<typeof createServer>): Promise<void> {
   return new Promise((resolve, reject) => {
     server.close((err) => (err ? reject(err) : resolve()));
   });
+}
+
+function normalizeHeaderName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+function isSecretValid(expectedToken: string | undefined, rawHeaderValue: string | string[] | undefined): boolean {
+  if (!expectedToken?.trim()) return true;
+  if (typeof rawHeaderValue === 'string') {
+    return rawHeaderValue === expectedToken;
+  }
+  if (Array.isArray(rawHeaderValue)) {
+    return rawHeaderValue.includes(expectedToken);
+  }
+  return false;
 }

@@ -4,6 +4,7 @@ import type { Update } from '../types';
 export interface FastifyLikeRequest {
   method: string;
   url: string;
+  headers?: Record<string, unknown>;
   body: unknown;
 }
 
@@ -14,6 +15,8 @@ export interface FastifyLikeReply {
 
 export interface FastifyWebhookAdapterOptions {
   path?: string;
+  secretToken?: string;
+  secretHeaderName?: string;
   handleInBackground?: boolean;
   onDispatchError?: (error: unknown, update: Update) => void | Promise<void>;
 }
@@ -30,6 +33,13 @@ export function createFastifyWebhookHandler(bot: Bot, options: FastifyWebhookAda
     const requestPath = extractPathname(req.url);
     if (requestPath !== path) {
       reply.code(404).send({ error: 'not found' });
+      return;
+    }
+
+    const secretHeaderName = normalizeHeaderName(options.secretHeaderName ?? 'x-max-bot-secret-token');
+    const headerValue = findHeaderValue(req.headers, secretHeaderName);
+    if (!isSecretValid(options.secretToken, headerValue)) {
+      reply.code(401).send({ error: 'unauthorized' });
       return;
     }
 
@@ -89,4 +99,27 @@ function parseUpdate(body: unknown): Update | null {
     return body as Update;
   }
   return null;
+}
+
+function normalizeHeaderName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+function findHeaderValue(headers: Record<string, unknown> | undefined, headerName: string): unknown {
+  if (!headers) return undefined;
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.trim().toLowerCase() === headerName) return value;
+  }
+  return undefined;
+}
+
+function isSecretValid(expectedToken: string | undefined, rawHeaderValue: unknown): boolean {
+  if (!expectedToken?.trim()) return true;
+  if (typeof rawHeaderValue === 'string') {
+    return rawHeaderValue === expectedToken;
+  }
+  if (Array.isArray(rawHeaderValue)) {
+    return rawHeaderValue.some((item) => typeof item === 'string' && item === expectedToken);
+  }
+  return false;
 }

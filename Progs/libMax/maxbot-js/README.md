@@ -24,6 +24,7 @@ Status: `v0.2.0`.
 - Polling lifecycle controls (`isPolling`, `stopLongPolling`)
 - Lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`)
 - Polling recovery backoff (`recoverErrors`, `errorDelayMs`, `maxErrorDelayMs`)
+- Webhook secret token validation (`secretToken`, `secretHeaderName`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -313,7 +314,12 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
-await bot.startWebhook({ addr: ':8080', path: '/webhook', handleInBackground: true });
+await bot.startWebhook({
+  addr: ':8080',
+  path: '/webhook',
+  handleInBackground: true,
+  secretToken: process.env.WEBHOOK_SECRET
+});
 ```
 
 ## Express Adapter
@@ -329,7 +335,11 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
-app.post('/webhook', createExpressWebhookHandler(bot, { path: '/webhook', handleInBackground: true }));
+app.post('/webhook', createExpressWebhookHandler(bot, {
+  path: '/webhook',
+  handleInBackground: true,
+  secretToken: process.env.WEBHOOK_SECRET
+}));
 ```
 
 ## Fastify Adapter
@@ -345,7 +355,11 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
-fastify.post('/webhook', createFastifyWebhookHandler(bot, { path: '/webhook', handleInBackground: true }));
+fastify.post('/webhook', createFastifyWebhookHandler(bot, {
+  path: '/webhook',
+  handleInBackground: true,
+  secretToken: process.env.WEBHOOK_SECRET
+}));
 ```
 
 ## Build

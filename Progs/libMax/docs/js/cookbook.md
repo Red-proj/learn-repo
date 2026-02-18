@@ -273,3 +273,12 @@ const dp = new Dispatcher({
   }
 });
 ```
+
+## 27. Webhook secret token check
+
+```ts
+app.post('/webhook', createExpressWebhookHandler(bot, {
+  path: '/webhook',
+  secretToken: process.env.WEBHOOK_SECRET
+}));
+```

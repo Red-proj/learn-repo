@@ -45,6 +45,10 @@ All notable changes to `maxbot-js` are documented in this file.
   - `polling.errorDelayMs`
   - `polling.maxErrorDelayMs`
 - `onError(...)` now handles exceptions from filters and `useMeta(...)` resolvers.
+- Added webhook secret token checks:
+  - `startWebhook({ secretToken, secretHeaderName })`
+  - `createExpressWebhookHandler(..., { secretToken, secretHeaderName })`
+  - `createFastifyWebhookHandler(..., { secretToken, secretHeaderName })`
 
 ## [v0.2.0] - 2026-02-18
 
