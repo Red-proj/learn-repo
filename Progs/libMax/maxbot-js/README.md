@@ -21,6 +21,7 @@ Status: `v0.2.0`.
 - Group state filters (`filters.stateIn`, `filters.stateGroup`)
 - Processing controls (`maxInFlight`, `orderedBy`, `handlerTimeoutMs`, `gracefulStop`)
 - Webhook background mode (`handleInBackground`) for fast ACK
+- Polling lifecycle controls (`isPolling`, `stopLongPolling`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -202,6 +203,14 @@ const dp = new Dispatcher({
 });
 
 await dp.gracefulStop();
+```
+
+```ts
+const polling = dp.startLongPolling();
+if (dp.isPolling()) {
+  await dp.stopLongPolling({ graceful: false });
+}
+await polling;
 ```
 
 ## Error Handling

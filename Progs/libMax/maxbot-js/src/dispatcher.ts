@@ -50,6 +50,8 @@ export class Dispatcher {
   private readonly gracefulShutdownMs?: number;
   private readonly polling: Required<NonNullable<DispatcherOptions['polling']>>;
   private stopping = false;
+  private pollingTask?: Promise<void>;
+  private pollingAbort?: AbortController;
   private inFlight = 0;
   private readonly waiters: Array<() => void> = [];
   private readonly keyedTails = new Map<string, Promise<void>>();
@@ -182,20 +184,71 @@ export class Dispatcher {
   }
 
   async startLongPolling(signal?: AbortSignal): Promise<void> {
+    if (this.pollingTask) {
+      throw new Error('long polling is already running');
+    }
+
+    const internalAbort = new AbortController();
+    this.pollingAbort = internalAbort;
+    const mergedSignal = mergeAbortSignals(signal, internalAbort.signal);
+
+    const task = this.runLongPolling(mergedSignal).finally(() => {
+      this.pollingTask = undefined;
+      this.pollingAbort = undefined;
+    });
+    this.pollingTask = task;
+    await task;
+  }
+
+  isPolling(): boolean {
+    return Boolean(this.pollingTask);
+  }
+
+  async stopLongPolling(options: { graceful?: boolean; timeoutMs?: number } = {}): Promise<boolean> {
+    this.pollingAbort?.abort();
+    const running = this.pollingTask;
+    if (running) {
+      try {
+        await running;
+      } catch (error) {
+        if (!isAbortError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    if (options.graceful === false) {
+      return true;
+    }
+    return await this.gracefulStop({ timeoutMs: options.timeoutMs });
+  }
+
+  private async runLongPolling(signal?: AbortSignal): Promise<void> {
     let offset = this.polling.offset;
 
     while (!signal?.aborted && !this.stopping) {
-      const updates = await this.client.getUpdates(
-        {
-          offset,
-          limit: this.polling.limit,
-          timeout: this.polling.timeoutSeconds
-        },
-        signal
-      );
+      let updates: Update[];
+      try {
+        updates = await this.client.getUpdates(
+          {
+            offset,
+            limit: this.polling.limit,
+            timeout: this.polling.timeoutSeconds
+          },
+          signal
+        );
+      } catch (error) {
+        if (isAbortError(error)) return;
+        throw error;
+      }
 
       if (!updates.length) {
-        await wait(this.polling.idleDelayMs, signal);
+        try {
+          await wait(this.polling.idleDelayMs, signal);
+        } catch (error) {
+          if (isAbortError(error)) return;
+          throw error;
+        }
         continue;
       }
 
@@ -206,8 +259,6 @@ export class Dispatcher {
         await this.handleUpdate(update);
       }
     }
-
-    await this.gracefulStop({ timeoutMs: this.gracefulShutdownMs });
   }
 
   async gracefulStop(options: { timeoutMs?: number } = {}): Promise<boolean> {
@@ -399,4 +450,24 @@ function resolveOrderKey(update: Update, ctx: Context, strategy: DispatchOrderSt
   if (strategy === 'chat') return String(ctx.chatID() || '');
   if (strategy === 'user') return String(ctx.userID() || '');
   return String(resolveFSMKey(update, fsmStrategy) || '');
+}
+
+function mergeAbortSignals(a?: AbortSignal, b?: AbortSignal): AbortSignal | undefined {
+  if (!a) return b;
+  if (!b) return a;
+  if (a.aborted || b.aborted) {
+    const c = new AbortController();
+    c.abort();
+    return c.signal;
+  }
+
+  const c = new AbortController();
+  const abort = () => c.abort();
+  a.addEventListener('abort', abort, { once: true });
+  b.addEventListener('abort', abort, { once: true });
+  return c.signal;
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === 'AbortError';
 }

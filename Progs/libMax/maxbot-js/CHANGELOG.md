@@ -34,6 +34,9 @@ All notable changes to `maxbot-js` are documented in this file.
   - `startWebhook({ handleInBackground: true })`
   - `createExpressWebhookHandler(..., { handleInBackground: true })`
   - `createFastifyWebhookHandler(..., { handleInBackground: true })`
+- Added polling lifecycle controls:
+  - `isPolling()`
+  - `stopLongPolling({ graceful?, timeoutMs? })`
 
 ## [v0.2.0] - 2026-02-18
 

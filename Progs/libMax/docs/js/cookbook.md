@@ -239,3 +239,11 @@ app.post('/webhook', createExpressWebhookHandler(bot, {
   handleInBackground: true
 }));
 ```
+
+## 24. Stop long polling gracefully
+
+```ts
+const polling = dp.startLongPolling();
+await dp.stopLongPolling({ graceful: true, timeoutMs: 10_000 });
+await polling;
+```

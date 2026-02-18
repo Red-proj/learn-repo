@@ -18,6 +18,7 @@
 - Added grouped FSM filters: `stateIn(...)` and `stateGroup(...)`.
 - Added dispatcher processing controls (`maxInFlight`, `orderedBy`, timeout, `gracefulStop`).
 - Added webhook background mode `handleInBackground` for Bot and adapters.
+- Added polling lifecycle controls (`isPolling`, `stopLongPolling`).
 
 ## v0.2.0 (2026-02-18)
 
