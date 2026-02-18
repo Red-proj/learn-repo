@@ -16,6 +16,7 @@ Status: `v0.2.0`
 - Structured command parsing via `ctx.commandInfo()` and `filters.commandMatch(...)`
 - Middleware helper: `createThrottleMiddleware(...)`
 - FSM state groups: `createStateGroup(...)`
+- FSM keying strategies via `Dispatcher({ fsmStrategy })`
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
@@ -61,6 +62,7 @@ dp.includeRouters(admin);
 - `createCallbackData(...).filter(...)` for callback-query routing
 - `filters.callbackDataRegex(...)` for callback matching
 - `createStateGroup(...)` for typed state naming
+- `fsmStrategy` to scope state by chat/user/global
 
 ## Next
 

@@ -16,6 +16,7 @@ Status: `v0.2.0`.
 - Structured command filter (`filters.commandMatch`) + `ctx.commandInfo()`
 - Built-in dispatch middleware helpers (`createThrottleMiddleware`)
 - State groups for FSM (`createStateGroup`)
+- FSM strategy selection (`chat`, `user_in_chat`, `user`, `global`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -61,7 +62,8 @@ import { Dispatcher, filters } from 'maxbot-js';
 
 const dp = new Dispatcher({
   token: process.env.BOT_TOKEN!,
-  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru'
+  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru',
+  fsmStrategy: 'chat'
 });
 
 dp.message([filters.command('start')], async (ctx) => {
@@ -149,6 +151,16 @@ dp.message([filters.command('start')], async (ctx) => {
 dp.message([filters.state(Signup.states.name)], async (ctx) => {
   await ctx.setState(Signup.states.age);
   await ctx.reply(`Hi ${ctx.messageText()}, your age?`);
+});
+```
+
+## FSM Strategy
+
+```ts
+const dp = new Dispatcher({
+  token: process.env.BOT_TOKEN!,
+  baseURL: process.env.MAX_API_BASE_URL!,
+  fsmStrategy: 'user_in_chat'
 });
 ```
 

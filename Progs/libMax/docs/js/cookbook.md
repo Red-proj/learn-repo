@@ -186,3 +186,13 @@ const Signup = createStateGroup('signup', ['name', 'age']);
 dp.message([filters.command('start')], (ctx) => ctx.setState(Signup.states.name));
 dp.message([filters.state(Signup.states.name)], (ctx) => ctx.setState(Signup.states.age));
 ```
+
+## 19. FSM strategy by user and chat
+
+```ts
+const dp = new Dispatcher({
+  token,
+  baseURL,
+  fsmStrategy: 'user_in_chat'
+});
+```

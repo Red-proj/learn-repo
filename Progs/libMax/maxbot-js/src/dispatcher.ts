@@ -17,18 +17,23 @@ export interface DispatcherOptions {
     idleDelayMs?: number;
   };
   fsmStorage?: FSMStorage;
+  fsmStrategy?: FSMStrategy;
 }
+
+export type FSMStrategy = 'chat' | 'user_in_chat' | 'user' | 'global';
 
 export class Dispatcher {
   readonly client: Client;
   readonly router: DispatchRouter;
   private readonly state: FSMStorage;
+  private readonly fsmStrategy: FSMStrategy;
   private readonly polling: Required<NonNullable<DispatcherOptions['polling']>>;
 
   constructor(clientOrConfig: Client | ClientConfig, options: DispatcherOptions = {}) {
     this.client = clientOrConfig instanceof Client ? clientOrConfig : new Client(clientOrConfig);
     this.router = new DispatchRouter();
     this.state = options.fsmStorage ?? new MemoryFSMStorage();
+    this.fsmStrategy = options.fsmStrategy ?? 'chat';
     this.polling = {
       offset: options.polling?.offset ?? 0,
       limit: options.polling?.limit ?? 100,
@@ -136,7 +141,7 @@ export class Dispatcher {
   }
 
   async handleUpdate(update: Update): Promise<boolean> {
-    const ctx = new Context(this.client, update, this.stateAccessor());
+    const ctx = new Context(this.client, update, this.stateAccessor(), {}, resolveFSMKey(update, this.fsmStrategy));
     return await this.router.dispatch(update, ctx);
   }
 
@@ -225,4 +230,19 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
 
     signal?.addEventListener('abort', onAbort, { once: true });
   });
+}
+
+function resolveFSMKey(update: Update, strategy: FSMStrategy): ID | '' {
+  if (strategy === 'global') return 'global';
+
+  const chatID = update.message?.chat.chat_id ?? update.callback_query?.chat?.chat_id ?? update.callback_query?.message?.chat.chat_id ?? '';
+  const userID = update.message?.sender?.user_id ?? update.callback_query?.from?.user_id ?? update.callback_query?.message?.sender?.user_id ?? '';
+
+  if (strategy === 'chat') return chatID;
+  if (strategy === 'user') return userID;
+  if (strategy === 'user_in_chat') {
+    if (!chatID || !userID) return '';
+    return `${chatID}:${userID}`;
+  }
+  return chatID;
 }

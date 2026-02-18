@@ -30,12 +30,14 @@ export class Context {
   readonly update: Update;
   private readonly stateAccessor?: StateAccessor;
   private readonly runtimeMeta: RuntimeMeta;
+  private readonly stateKeyOverride?: ID;
 
-  constructor(client: Client, update: Update, stateAccessor?: StateAccessor, runtimeMeta: RuntimeMeta = {}) {
+  constructor(client: Client, update: Update, stateAccessor?: StateAccessor, runtimeMeta: RuntimeMeta = {}, stateKeyOverride?: ID) {
     this.client = client;
     this.update = update;
     this.stateAccessor = stateAccessor;
     this.runtimeMeta = { ...runtimeMeta };
+    this.stateKeyOverride = stateKeyOverride;
   }
 
   message(): Message | undefined {
@@ -125,7 +127,7 @@ export class Context {
   }
 
   withMeta(patch: RuntimeMeta): Context {
-    return new Context(this.client, this.update, this.stateAccessor, { ...this.runtimeMeta, ...patch });
+    return new Context(this.client, this.update, this.stateAccessor, { ...this.runtimeMeta, ...patch }, this.stateKeyOverride);
   }
 
   async reply(text: string, optionsOrSignal?: ReplyOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<void> {
@@ -144,46 +146,50 @@ export class Context {
   }
 
   async getState(): Promise<string | undefined> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return undefined;
-    return await this.stateAccessor.getState(chatID);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return undefined;
+    return await this.stateAccessor.getState(stateKey);
   }
 
   async setState(state: string): Promise<void> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return;
-    await this.stateAccessor.setState(chatID, state);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return;
+    await this.stateAccessor.setState(stateKey, state);
   }
 
   async clearState(): Promise<void> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return;
-    await this.stateAccessor.clearState(chatID);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return;
+    await this.stateAccessor.clearState(stateKey);
   }
 
   async getData<TData extends FSMData = FSMData>(): Promise<TData> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return {} as TData;
-    const data = await this.stateAccessor.getData(chatID);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return {} as TData;
+    const data = await this.stateAccessor.getData(stateKey);
     return ((data ?? {}) as TData);
   }
 
   async setData(data: FSMData): Promise<void> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return;
-    await this.stateAccessor.setData(chatID, data);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return;
+    await this.stateAccessor.setData(stateKey, data);
   }
 
   async updateData(patch: FSMData): Promise<void> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return;
-    await this.stateAccessor.updateData(chatID, patch);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return;
+    await this.stateAccessor.updateData(stateKey, patch);
   }
 
   async clearData(): Promise<void> {
-    const chatID = this.chatID();
-    if (!chatID || !this.stateAccessor) return;
-    await this.stateAccessor.clearData(chatID);
+    const stateKey = this.stateKey();
+    if (!stateKey || !this.stateAccessor) return;
+    await this.stateAccessor.clearData(stateKey);
+  }
+
+  private stateKey(): ID | '' {
+    return this.stateKeyOverride ?? this.chatID();
   }
 }
 

@@ -21,6 +21,7 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added `filters.commandMatch(...)` to route by command and inject parsed command into metadata.
 - Exported middleware helpers with `createThrottleMiddleware(...)`.
 - Added `createStateGroup(...)` helper for structured FSM state naming.
+- Added FSM strategy option in dispatcher: `fsmStrategy` (`chat`, `user_in_chat`, `user`, `global`).
 
 ## [v0.2.0] - 2026-02-18
 

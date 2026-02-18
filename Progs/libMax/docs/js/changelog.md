@@ -13,6 +13,7 @@
 - Structured command parsing: `ctx.commandInfo()` and `filters.commandMatch(...)`.
 - Added middleware helper `createThrottleMiddleware(...)`.
 - Added FSM helper `createStateGroup(...)`.
+- Added dispatcher `fsmStrategy` for chat/user/global state scoping.
 
 ## v0.2.0 (2026-02-18)
 
