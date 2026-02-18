@@ -19,6 +19,7 @@
 - Added dispatcher processing controls (`maxInFlight`, `orderedBy`, timeout, `gracefulStop`).
 - Added webhook background mode `handleInBackground` for Bot and adapters.
 - Added polling lifecycle controls (`isPolling`, `stopLongPolling`).
+- Added dispatcher lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`).
 
 ## v0.2.0 (2026-02-18)
 

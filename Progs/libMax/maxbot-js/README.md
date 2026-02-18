@@ -22,6 +22,7 @@ Status: `v0.2.0`.
 - Processing controls (`maxInFlight`, `orderedBy`, `handlerTimeoutMs`, `gracefulStop`)
 - Webhook background mode (`handleInBackground`) for fast ACK
 - Polling lifecycle controls (`isPolling`, `stopLongPolling`)
+- Lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -211,6 +212,18 @@ if (dp.isPolling()) {
   await dp.stopLongPolling({ graceful: false });
 }
 await polling;
+```
+
+## Lifecycle Hooks
+
+```ts
+dp.onStartup(async () => {
+  // init db/cache
+});
+
+dp.onShutdown(async () => {
+  // close resources
+});
 ```
 
 ## Error Handling

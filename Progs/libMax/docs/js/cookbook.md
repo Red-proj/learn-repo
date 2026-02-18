@@ -247,3 +247,15 @@ const polling = dp.startLongPolling();
 await dp.stopLongPolling({ graceful: true, timeoutMs: 10_000 });
 await polling;
 ```
+
+## 25. Startup and shutdown hooks
+
+```ts
+dp.onStartup(async () => {
+  await connectDB();
+});
+
+dp.onShutdown(async () => {
+  await closeDB();
+});
+```

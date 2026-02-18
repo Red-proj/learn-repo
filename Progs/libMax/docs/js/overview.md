@@ -22,6 +22,7 @@ Status: `v0.2.0`
 - Dispatcher processing controls (`maxInFlight`, `orderedBy`, timeout, graceful stop)
 - Webhook `handleInBackground` for fast response and async dispatch
 - Polling lifecycle methods: `isPolling()`, `stopLongPolling(...)`
+- Dispatcher lifecycle hooks: `onStartup`, `onShutdown`
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

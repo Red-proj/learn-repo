@@ -37,6 +37,9 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added polling lifecycle controls:
   - `isPolling()`
   - `stopLongPolling({ graceful?, timeoutMs? })`
+- Added dispatcher lifecycle hooks:
+  - `onStartup(...)` / `onShutdown(...)`
+  - `startup()` / `shutdown(...)`
 
 ## [v0.2.0] - 2026-02-18
 

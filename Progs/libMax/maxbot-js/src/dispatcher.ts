@@ -9,6 +9,7 @@ export type DispatchHandler = (ctx: Context) => Promise<void> | void;
 export type DispatchMiddleware = (next: DispatchHandler) => DispatchHandler;
 export type DispatchErrorHandler = (error: unknown, ctx: Context) => Promise<boolean | void> | boolean | void;
 export type DispatchOrderStrategy = 'none' | 'chat' | 'user' | 'fsm';
+export type DispatchLifecycleHandler = (dp: Dispatcher) => Promise<void> | void;
 
 export class DispatchTimeoutError extends Error {
   readonly timeoutMs: number;
@@ -56,6 +57,9 @@ export class Dispatcher {
   private readonly waiters: Array<() => void> = [];
   private readonly keyedTails = new Map<string, Promise<void>>();
   private readonly pending = new Set<Promise<unknown>>();
+  private readonly startupHandlers: DispatchLifecycleHandler[] = [];
+  private readonly shutdownHandlers: DispatchLifecycleHandler[] = [];
+  private lifecycleStarted = false;
 
   constructor(clientOrConfig: Client | ClientConfig, options: DispatcherOptions = {}) {
     this.client = clientOrConfig instanceof Client ? clientOrConfig : new Client(clientOrConfig);
@@ -104,6 +108,14 @@ export class Dispatcher {
 
   onErrorFirst(handler: DispatchErrorHandler): void {
     this.router.onErrorFirst(handler);
+  }
+
+  onStartup(handler: DispatchLifecycleHandler): void {
+    this.startupHandlers.push(handler);
+  }
+
+  onShutdown(handler: DispatchLifecycleHandler): void {
+    this.shutdownHandlers.push(handler);
   }
 
   message(handler: DispatchHandler): void;
@@ -188,13 +200,15 @@ export class Dispatcher {
       throw new Error('long polling is already running');
     }
 
+    await this.startup();
     const internalAbort = new AbortController();
     this.pollingAbort = internalAbort;
     const mergedSignal = mergeAbortSignals(signal, internalAbort.signal);
 
-    const task = this.runLongPolling(mergedSignal).finally(() => {
+    const task = this.runLongPolling(mergedSignal).finally(async () => {
       this.pollingTask = undefined;
       this.pollingAbort = undefined;
+      await this.shutdown({ graceful: false });
     });
     this.pollingTask = task;
     await task;
@@ -265,6 +279,28 @@ export class Dispatcher {
     this.stopping = true;
     const timeoutMs = normalizeTimeout(options.timeoutMs) ?? this.gracefulShutdownMs;
     return await this.waitForDrain(timeoutMs);
+  }
+
+  async startup(): Promise<void> {
+    if (this.lifecycleStarted) return;
+    for (const handler of this.startupHandlers) {
+      await handler(this);
+    }
+    this.lifecycleStarted = true;
+  }
+
+  async shutdown(options: { graceful?: boolean; timeoutMs?: number } = {}): Promise<boolean> {
+    if (options.graceful !== false) {
+      await this.gracefulStop({ timeoutMs: options.timeoutMs });
+    }
+    if (!this.lifecycleStarted) {
+      return true;
+    }
+    for (const handler of this.shutdownHandlers) {
+      await handler(this);
+    }
+    this.lifecycleStarted = false;
+    return true;
   }
 
   async getState(chatID: ID): Promise<string | undefined> {
