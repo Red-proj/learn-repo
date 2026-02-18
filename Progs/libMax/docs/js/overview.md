@@ -8,6 +8,7 @@ Status: `v0.2.0`
 - Client (`getUpdates`, `sendMessage`)
 - Router + middleware
 - Dispatcher layer (`Dispatcher`) with filters and FSM
+- FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
 - Express/Fastify webhook adapters
@@ -31,6 +32,12 @@ const dp = new Dispatcher({ token: process.env.BOT_TOKEN!, baseURL: process.env.
 dp.message([filters.command('start')], (ctx) => ctx.reply('hello'));
 await dp.startLongPolling();
 ```
+
+## New helpers
+
+- `ctx.commandArgs()` to parse command arguments
+- `createCallbackData(...).filter(...)` for callback-query routing
+- `filters.callbackDataRegex(...)` for callback matching
 
 ## Next
 

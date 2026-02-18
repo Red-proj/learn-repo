@@ -1,6 +1,6 @@
 import { Client, type ClientConfig } from './client';
 import { Context, type StateAccessor } from './context';
-import { MemoryFSMStorage, type FSMStorage } from './fsm';
+import { MemoryFSMStorage, type FSMData, type FSMStorage } from './fsm';
 import type { Filter } from './filters';
 import type { ID, Update } from './types';
 
@@ -113,6 +113,23 @@ export class Dispatcher {
     await this.state.set(chatID, state);
   }
 
+  async getData<TData extends FSMData = FSMData>(chatID: ID): Promise<TData> {
+    const data = await this.state.getData(chatID);
+    return ((data ?? {}) as TData);
+  }
+
+  async setData(chatID: ID, data: FSMData): Promise<void> {
+    await this.state.setData(chatID, data);
+  }
+
+  async updateData(chatID: ID, patch: FSMData): Promise<void> {
+    await this.state.updateData(chatID, patch);
+  }
+
+  async clearData(chatID: ID): Promise<void> {
+    await this.state.clearData(chatID);
+  }
+
   async clearState(chatID: ID): Promise<void> {
     await this.state.clear(chatID);
   }
@@ -130,7 +147,11 @@ export class Dispatcher {
     return {
       getState: (chatID) => this.state.get(chatID),
       setState: (chatID, state) => this.state.set(chatID, state),
-      clearState: (chatID) => this.state.clear(chatID)
+      clearState: (chatID) => this.state.clear(chatID),
+      getData: (chatID) => this.state.getData(chatID),
+      setData: (chatID, data) => this.state.setData(chatID, data),
+      updateData: (chatID, patch) => this.state.updateData(chatID, patch),
+      clearData: (chatID) => this.state.clearData(chatID)
     };
   }
 }

@@ -1,10 +1,15 @@
 import type { CallbackQuery, ID, Message, Update } from './types';
 import type { Client } from './client';
+import type { FSMData } from './fsm';
 
 export interface StateAccessor {
   getState(chatID: ID): Promise<string | undefined> | string | undefined;
   setState(chatID: ID, state: string): Promise<void> | void;
   clearState(chatID: ID): Promise<void> | void;
+  getData(chatID: ID): Promise<FSMData | undefined> | FSMData | undefined;
+  setData(chatID: ID, data: FSMData): Promise<void> | void;
+  updateData(chatID: ID, patch: FSMData): Promise<void> | void;
+  clearData(chatID: ID): Promise<void> | void;
 }
 
 export interface ReplyOptions {
@@ -60,6 +65,15 @@ export class Context {
     return this.command() === normalized;
   }
 
+  commandArgs(): string {
+    const text = this.messageText();
+    if (!text.startsWith('/')) return '';
+    const trimmed = text.slice(1).trim();
+    const firstSpace = trimmed.search(/\s/);
+    if (firstSpace < 0) return '';
+    return trimmed.slice(firstSpace + 1).trim();
+  }
+
   chatID(): ID | '' {
     return this.update.message?.chat.chat_id ?? this.update.callback_query?.chat?.chat_id ?? this.update.callback_query?.message?.chat.chat_id ?? '';
   }
@@ -95,6 +109,31 @@ export class Context {
     const chatID = this.chatID();
     if (!chatID || !this.stateAccessor) return;
     await this.stateAccessor.clearState(chatID);
+  }
+
+  async getData<TData extends FSMData = FSMData>(): Promise<TData> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return {} as TData;
+    const data = await this.stateAccessor.getData(chatID);
+    return ((data ?? {}) as TData);
+  }
+
+  async setData(data: FSMData): Promise<void> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return;
+    await this.stateAccessor.setData(chatID, data);
+  }
+
+  async updateData(patch: FSMData): Promise<void> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return;
+    await this.stateAccessor.updateData(chatID, patch);
+  }
+
+  async clearData(): Promise<void> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return;
+    await this.stateAccessor.clearData(chatID);
   }
 }
 

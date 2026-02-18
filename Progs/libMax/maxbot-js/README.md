@@ -9,7 +9,7 @@ Status: `v0.2.0`.
 - Typed API client (`getUpdates`, `sendMessage`)
 - Aiogram-like dispatcher layer (`Dispatcher`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
-- FSM storage (`MemoryFSMStorage`)
+- FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
 - Retry/backoff + `Retry-After` support for retryable API failures
 - Built-in rate limiter policy (`rateLimitRps`, default `30`)
@@ -58,11 +58,14 @@ const dp = new Dispatcher({
 
 dp.message([filters.command('start')], async (ctx) => {
   await ctx.setState('await_name');
+  await ctx.setData({ startedAt: Date.now() });
   await ctx.reply('Как тебя зовут?');
 });
 
 dp.message([filters.state('await_name')], async (ctx) => {
-  await ctx.reply(`Приятно познакомиться, ${ctx.messageText()}!`);
+  const data = await ctx.getData<{ startedAt?: number }>();
+  await ctx.reply(`Приятно познакомиться, ${ctx.messageText()}! startedAt=${data.startedAt ?? 'n/a'}`);
+  await ctx.clearData();
   await ctx.clearState();
 });
 
@@ -81,6 +84,20 @@ const keyboard = new InlineKeyboardBuilder()
   .build();
 
 await ctx.reply('Выбери действие', { replyMarkup: keyboard });
+
+dp.callbackQuery([cb.filter({ action: 'open' })], async (ctx) => {
+  const parsed = cb.unpack(ctx.callbackData());
+  await ctx.reply(`open id=${parsed?.id ?? ''}`);
+});
+```
+
+## Command Args
+
+```ts
+dp.message([filters.command('ban')], async (ctx) => {
+  const args = ctx.commandArgs(); // e.g. "user42 spam"
+  await ctx.reply(`args: ${args}`);
+});
 ```
 
 ## Quick Start (Webhook)
@@ -161,9 +178,9 @@ console.log(calls.length); // 1
 
 ## Cookbook
 
-- Practical recipes: `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-js/COOKBOOK.md`
+- Practical recipes: `Progs/maxbot-js/COOKBOOK.md`
 
 ## Examples
 
-- `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-js/examples/echo-polling.ts`
-- `/Users/sergeyvishnykovjr./Progs/libMax/maxbot-js/examples/echo-webhook.ts`
+- `Progs/maxbot-js/examples/echo-polling.ts`
+- `Progs/maxbot-js/examples/echo-webhook.ts`

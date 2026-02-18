@@ -36,11 +36,14 @@ await dp.startLongPolling();
 ```ts
 dp.message([filters.command('start')], async (ctx) => {
   await ctx.setState('await_name');
+  await ctx.setData({ startedAt: Date.now() });
   await ctx.reply('Как тебя зовут?');
 });
 
 dp.message([filters.state('await_name')], async (ctx) => {
-  await ctx.reply(`Приятно познакомиться, ${ctx.messageText()}!`);
+  const data = await ctx.getData<{ startedAt?: number }>();
+  await ctx.reply(`Приятно познакомиться, ${ctx.messageText()}! startedAt=${data.startedAt ?? 'n/a'}`);
+  await ctx.clearData();
   await ctx.clearState();
 });
 ```
@@ -62,9 +65,23 @@ const parsed = cb.unpack(ctx.callbackData());
 if (parsed?.action === 'open') {
   await ctx.reply(`open id=${parsed.id}`);
 }
+
+dp.callbackQuery([cb.filter({ action: 'open' })], async (ctx) => {
+  const parsed = cb.unpack(ctx.callbackData());
+  await ctx.reply(`open id=${parsed?.id ?? ''}`);
+});
 ```
 
-## 5. Express adapter integration
+## 5. Command args
+
+```ts
+dp.message([filters.command('ban')], async (ctx) => {
+  const args = ctx.commandArgs(); // "user42 spam"
+  await ctx.reply(`args: ${args}`);
+});
+```
+
+## 6. Express adapter integration
 
 ```ts
 import express from 'express';
@@ -78,7 +95,7 @@ const bot = new Bot(client);
 app.post('/webhook', createExpressWebhookHandler(bot, { path: '/webhook' }));
 ```
 
-## 6. Fastify adapter integration
+## 7. Fastify adapter integration
 
 ```ts
 import Fastify from 'fastify';
@@ -91,7 +108,7 @@ const bot = new Bot(client);
 fastify.post('/webhook', createFastifyWebhookHandler(bot, { path: '/webhook' }));
 ```
 
-## 7. Retry and rate-limit tuning
+## 8. Retry and rate-limit tuning
 
 ```ts
 const client = new Client({
@@ -104,7 +121,7 @@ const client = new Client({
 });
 ```
 
-## 8. Unit testing with testkit
+## 9. Unit testing with testkit
 
 ```ts
 import { createMockClient, createMessageUpdate, updatesResponse } from 'maxbot-js';

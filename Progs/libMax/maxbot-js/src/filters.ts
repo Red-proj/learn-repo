@@ -31,6 +31,10 @@ export const filters = {
     return (ctx) => ctx.callbackData().startsWith(expected);
   },
 
+  callbackDataRegex(pattern: RegExp): Filter {
+    return (ctx) => pattern.test(ctx.callbackData());
+  },
+
   state(expectedState: string): Filter {
     return async (ctx) => (await ctx.getState()) === expectedState;
   },
