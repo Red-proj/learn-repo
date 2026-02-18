@@ -36,6 +36,8 @@
 - Added extended dispatcher observers for inline/payment/poll/member updates.
 - Added `filters.updateType(...)` / `filters.notUpdateType(...)`.
 - Added context/client helpers for callback answer and message edit.
+- Added Redis helpers for KV operations and FSM storage adapter.
+- Added Kafka helpers (bus + KafkaJS adapters).
 
 ## v0.2.0 (2026-02-18)
 

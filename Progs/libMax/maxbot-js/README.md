@@ -42,6 +42,8 @@ Status: `v0.2.0`.
 - Update-type filters (`filters.updateType`, `filters.notUpdateType`)
 - Context action helpers (`ctx.answerCallback`, `ctx.editMessage`)
 - Client methods (`answerCallbackQuery`, `editMessageText`)
+- Redis integrations (`createRedisKV`, `createRedisFSMStorage`)
+- Kafka integrations (`createKafkaBus`, KafkaJS adapters)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -135,6 +137,54 @@ dp.pollAnswer((ctx) => console.log('poll answer', ctx.userID()));
 dp.callbackQuery(async (ctx) => {
   await ctx.answerCallback('Done');
   await ctx.editMessage('Updated text');
+});
+```
+
+## Redis Integration
+
+```ts
+import { createRedisFSMStorage, createNodeRedisAdapter, Dispatcher } from 'maxbot-js';
+import { createClient } from 'redis';
+
+const redis = createClient({ url: process.env.REDIS_URL });
+await redis.connect();
+
+const fsmStorage = createRedisFSMStorage(createNodeRedisAdapter(redis), {
+  namespace: 'my-bot-prod',
+  dataTTLSeconds: 60 * 60 * 24
+});
+
+const dp = new Dispatcher(
+  { token: process.env.BOT_TOKEN!, baseURL: process.env.MAX_API_BASE_URL! },
+  { fsmStorage }
+);
+```
+
+## Kafka Integration
+
+```ts
+import {
+  createKafkaBus,
+  createKafkaJSConsumerAdapter,
+  createKafkaJSProducerAdapter
+} from 'maxbot-js';
+import { Kafka } from 'kafkajs';
+
+const kafka = new Kafka({ brokers: ['localhost:9092'] });
+const producer = kafka.producer();
+const consumer = kafka.consumer({ groupId: 'bot-events' });
+await producer.connect();
+await consumer.connect();
+
+const bus = createKafkaBus(
+  createKafkaJSProducerAdapter(producer),
+  createKafkaJSConsumerAdapter(consumer),
+  { topicPrefix: 'maxbot' }
+);
+
+await bus.publishJSON('bot.updates', { updateID: 1, kind: 'message' });
+await bus.subscribeJSON('bot.updates', async (msg) => {
+  console.log(msg.value);
 });
 ```
 

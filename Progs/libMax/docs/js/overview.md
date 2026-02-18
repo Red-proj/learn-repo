@@ -39,6 +39,8 @@ Status: `v0.2.0`
 - Extended dispatcher observers (`inlineQuery`, `pollAnswer`, `chatJoinRequest`, etc.)
 - Update-type routing filters (`updateType`, `notUpdateType`)
 - Context callback/message action helpers (`answerCallback`, `editMessage`)
+- Redis helpers (`createRedisKV`, `createRedisFSMStorage`)
+- Kafka helpers (`createKafkaBus`, KafkaJS adapters)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

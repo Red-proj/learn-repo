@@ -391,3 +391,40 @@ dp.callbackQuery(async (ctx) => {
   await ctx.editMessage('Done');
 });
 ```
+
+## 38. Redis KV and FSM storage
+
+```ts
+import { createNodeRedisAdapter, createRedisFSMStorage, createRedisKV } from 'maxbot-js';
+
+const adapter = createNodeRedisAdapter(redisClient);
+const kv = createRedisKV(adapter, { namespace: 'my-bot' });
+await kv.setJSON('feature_flags', { newFlow: true });
+
+const fsmStorage = createRedisFSMStorage(adapter, {
+  namespace: 'my-bot',
+  dataTTLSeconds: 86400
+});
+const dp = new Dispatcher({ token, baseURL }, { fsmStorage });
+```
+
+## 39. Kafka event bus
+
+```ts
+import {
+  createKafkaBus,
+  createKafkaJSConsumerAdapter,
+  createKafkaJSProducerAdapter
+} from 'maxbot-js';
+
+const bus = createKafkaBus(
+  createKafkaJSProducerAdapter(kafkaProducer),
+  createKafkaJSConsumerAdapter(kafkaConsumer),
+  { topicPrefix: 'maxbot' }
+);
+
+await bus.publishJSON('bot.updates', { chatID: 'chat-1', type: 'message' });
+await bus.subscribeJSON('bot.updates', async (message) => {
+  console.log(message.value);
+});
+```

@@ -15,3 +15,5 @@ export * from './scenes';
 export * from './middlewares';
 export * from './keyboard';
 export * from './callback-data';
+export * from './integrations/redis';
+export * from './integrations/kafka';

@@ -88,6 +88,13 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added context/client action helpers:
   - `ctx.answerCallback(...)`, `ctx.editMessage(...)`
   - `client.answerCallbackQuery(...)`, `client.editMessageText(...)`
+- Added Redis integrations:
+  - `createRedisKV(...)`
+  - `createRedisFSMStorage(...)`
+  - adapters for `redis` and `ioredis` clients
+- Added Kafka integrations:
+  - `createKafkaBus(...)`
+  - KafkaJS producer/consumer adapters
 
 ## [v0.2.0] - 2026-02-18
 
