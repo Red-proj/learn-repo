@@ -24,6 +24,7 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added FSM strategy option in dispatcher: `fsmStrategy` (`chat`, `user_in_chat`, `user`, `global`).
 - Added identity helpers in context: `ctx.userID()` and `ctx.chatType()`.
 - Added filters: `filters.chatID(...)`, `filters.userID(...)`, `filters.chatType(...)`.
+- Added grouped FSM filters: `filters.stateIn(...)` and `filters.stateGroup(...)`.
 
 ## [v0.2.0] - 2026-02-18
 

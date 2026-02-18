@@ -18,6 +18,7 @@ Status: `v0.2.0`.
 - State groups for FSM (`createStateGroup`)
 - FSM strategy selection (`chat`, `user_in_chat`, `user`, `global`)
 - Identity filters (`filters.chatID`, `filters.userID`, `filters.chatType`)
+- Group state filters (`filters.stateIn`, `filters.stateGroup`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -160,6 +161,12 @@ dp.message([filters.command('start')], async (ctx) => {
 dp.message([filters.state(Signup.states.name)], async (ctx) => {
   await ctx.setState(Signup.states.age);
   await ctx.reply(`Hi ${ctx.messageText()}, your age?`);
+});
+```
+
+```ts
+dp.message([filters.stateGroup(Signup)], (ctx) => {
+  return ctx.reply(`inside signup flow: ${ctx.messageText()}`);
 });
 ```
 

@@ -18,6 +18,7 @@ Status: `v0.2.0`
 - FSM state groups: `createStateGroup(...)`
 - FSM keying strategies via `Dispatcher({ fsmStrategy })`
 - Identity routing filters (`chatID`, `userID`, `chatType`)
+- Group state filters (`stateIn`, `stateGroup`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
@@ -65,6 +66,7 @@ dp.includeRouters(admin);
 - `createStateGroup(...)` for typed state naming
 - `fsmStrategy` to scope state by chat/user/global
 - `filters.chatID/userID/chatType` for access control routing
+- `filters.stateIn/stateGroup` for multi-state routing
 
 ## Next
 

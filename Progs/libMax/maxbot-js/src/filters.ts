@@ -1,5 +1,6 @@
 import type { Context } from './context';
 import type { RuntimeMeta } from './context';
+import type { StateGroup } from './state-group';
 
 export type FilterResult = boolean | RuntimeMeta;
 export type Filter = (ctx: Context) => FilterResult | Promise<FilterResult>;
@@ -80,6 +81,19 @@ export const filters = {
 
   state(expectedState: string): Filter {
     return async (ctx) => (await ctx.getState()) === expectedState;
+  },
+
+  stateIn(...states: string[]): Filter {
+    const allowed = new Set(states.map((x) => x.trim()).filter(Boolean));
+    return async (ctx) => {
+      const value = await ctx.getState();
+      if (!value) return false;
+      return allowed.has(value);
+    };
+  },
+
+  stateGroup(group: Pick<StateGroup<string>, 'has'>): Filter {
+    return async (ctx) => group.has(await ctx.getState());
   },
 
   stateStartsWith(prefix: string): Filter {

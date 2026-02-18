@@ -204,3 +204,13 @@ dp.message([filters.chatID('admins-chat'), filters.userID('owner-user')], (ctx) 
   return ctx.reply('admin-only');
 });
 ```
+
+## 21. Route by a group of states
+
+```ts
+const Signup = createStateGroup('signup', ['name', 'age']);
+
+dp.message([filters.stateGroup(Signup)], (ctx) => {
+  return ctx.reply(`flow message: ${ctx.messageText()}`);
+});
+```

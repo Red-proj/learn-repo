@@ -1,6 +1,7 @@
 export type StateGroup<TName extends string> = {
   readonly prefix: string;
   readonly states: Record<TName, string>;
+  all(): string[];
   state(name: TName): string;
   has(value: string | undefined): boolean;
   is(value: string | undefined, name: TName): boolean;
@@ -32,6 +33,9 @@ export function createStateGroup<const TNames extends readonly string[]>(
   return {
     prefix: normalizedPrefix,
     states,
+    all() {
+      return Object.values(states);
+    },
     state(name) {
       return states[name];
     },
