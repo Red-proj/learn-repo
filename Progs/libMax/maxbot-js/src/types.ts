@@ -36,10 +36,21 @@ export interface CallbackQuery {
 export interface SendMessageRequest {
   chat_id: ID;
   text: string;
+  reply_markup?: InlineKeyboardMarkup | Record<string, unknown>;
 }
 
 export interface GetUpdatesOptions {
   offset?: number;
   limit?: number;
   timeout?: number;
+}
+
+export interface InlineKeyboardButton {
+  text: string;
+  callback_data?: string;
+  url?: string;
+}
+
+export interface InlineKeyboardMarkup {
+  inline_keyboard: InlineKeyboardButton[][];
 }

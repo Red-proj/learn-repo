@@ -1,13 +1,25 @@
 import type { CallbackQuery, ID, Message, Update } from './types';
 import type { Client } from './client';
 
+export interface StateAccessor {
+  getState(chatID: ID): Promise<string | undefined> | string | undefined;
+  setState(chatID: ID, state: string): Promise<void> | void;
+  clearState(chatID: ID): Promise<void> | void;
+}
+
+export interface ReplyOptions {
+  replyMarkup?: Record<string, unknown>;
+}
+
 export class Context {
   readonly client: Client;
   readonly update: Update;
+  private readonly stateAccessor?: StateAccessor;
 
-  constructor(client: Client, update: Update) {
+  constructor(client: Client, update: Update, stateAccessor?: StateAccessor) {
     this.client = client;
     this.update = update;
+    this.stateAccessor = stateAccessor;
   }
 
   message(): Message | undefined {
@@ -52,9 +64,40 @@ export class Context {
     return this.update.message?.chat.chat_id ?? this.update.callback_query?.chat?.chat_id ?? this.update.callback_query?.message?.chat.chat_id ?? '';
   }
 
-  async reply(text: string, signal?: AbortSignal): Promise<void> {
+  async reply(text: string, optionsOrSignal?: ReplyOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<void> {
     const chatID = this.chatID();
     if (!chatID) return;
-    await this.client.sendMessage({ chat_id: chatID, text }, signal);
+    const options = isAbortSignal(optionsOrSignal) ? undefined : optionsOrSignal;
+    const signal = isAbortSignal(optionsOrSignal) ? optionsOrSignal : maybeSignal;
+    await this.client.sendMessage(
+      {
+        chat_id: chatID,
+        text,
+        ...(options?.replyMarkup ? { reply_markup: options.replyMarkup } : {})
+      },
+      signal
+    );
   }
+
+  async getState(): Promise<string | undefined> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return undefined;
+    return await this.stateAccessor.getState(chatID);
+  }
+
+  async setState(state: string): Promise<void> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return;
+    await this.stateAccessor.setState(chatID, state);
+  }
+
+  async clearState(): Promise<void> {
+    const chatID = this.chatID();
+    if (!chatID || !this.stateAccessor) return;
+    await this.stateAccessor.clearState(chatID);
+  }
+}
+
+function isAbortSignal(v: unknown): v is AbortSignal {
+  return Boolean(v && typeof v === 'object' && 'aborted' in (v as Record<string, unknown>));
 }

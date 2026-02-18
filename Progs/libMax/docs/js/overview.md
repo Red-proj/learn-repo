@@ -7,6 +7,8 @@ Status: `v0.2.0`
 - TS-first typed API
 - Client (`getUpdates`, `sendMessage`)
 - Router + middleware
+- Dispatcher layer (`Dispatcher`) with filters and FSM
+- Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
 - Express/Fastify webhook adapters
 - Retry/backoff with `Retry-After`
@@ -20,19 +22,14 @@ Status: `v0.2.0`
 npm install maxbot-js
 ```
 
-## Long Polling Quick Start
+## Dispatcher Quick Start
 
 ```ts
-const client = new Client({ token: process.env.BOT_TOKEN!, baseURL: process.env.MAX_API_BASE_URL! });
-const bot = new Bot(client);
-bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
-await bot.startLongPolling();
-```
+import { Dispatcher, filters } from 'maxbot-js';
 
-## Webhook Quick Start
-
-```ts
-await bot.startWebhook({ addr: ':8080', path: '/webhook' });
+const dp = new Dispatcher({ token: process.env.BOT_TOKEN!, baseURL: process.env.MAX_API_BASE_URL! });
+dp.message([filters.command('start')], (ctx) => ctx.reply('hello'));
+await dp.startLongPolling();
 ```
 
 ## Next

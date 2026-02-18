@@ -6,3 +6,8 @@ export * from './bot';
 export * from './adapters/express';
 export * from './adapters/fastify';
 export * from './testkit';
+export * from './filters';
+export * from './dispatcher';
+export * from './fsm';
+export * from './keyboard';
+export * from './callback-data';

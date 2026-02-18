@@ -1,7 +1,5 @@
 # maxbot-js Cookbook
 
-Practical recipes for common production and development scenarios.
-
 ## 1. Echo bot (long polling)
 
 ```ts
@@ -9,60 +7,61 @@ import { Bot, Client } from 'maxbot-js';
 
 const client = new Client({
   token: process.env.BOT_TOKEN!,
-  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru',
-  maxRetries: 2,
-  rateLimitRps: 30
+  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru'
 });
 
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
-
 await bot.startLongPolling();
 ```
 
-## 2. Command routing with fallback text handler
+## 2. Aiogram-like dispatcher and filters
 
 ```ts
-bot.handleCommand('start', async (ctx) => {
-  await ctx.reply('Welcome');
+import { Dispatcher, filters } from 'maxbot-js';
+
+const dp = new Dispatcher({
+  token: process.env.BOT_TOKEN!,
+  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru'
 });
 
-bot.handleCommand('help', async (ctx) => {
-  await ctx.reply('Available commands: /start, /help');
+dp.message([filters.command('start')], (ctx) => ctx.reply('Welcome'));
+dp.callbackQuery([filters.callbackDataStartsWith('menu:')], (ctx) => ctx.reply('callback handled'));
+
+await dp.startLongPolling();
+```
+
+## 3. FSM states
+
+```ts
+dp.message([filters.command('start')], async (ctx) => {
+  await ctx.setState('await_name');
+  await ctx.reply('Как тебя зовут?');
 });
 
-bot.handleText(async (ctx) => {
-  await ctx.reply('Use /help to see available commands.');
+dp.message([filters.state('await_name')], async (ctx) => {
+  await ctx.reply(`Приятно познакомиться, ${ctx.messageText()}!`);
+  await ctx.clearState();
 });
 ```
 
-## 3. Middleware for metrics and timing
+## 4. Inline keyboard + callback data
 
 ```ts
-bot.use((next) => async (ctx) => {
-  const started = Date.now();
-  try {
-    await next(ctx);
-  } finally {
-    const elapsed = Date.now() - started;
-    console.log('update handled in', elapsed, 'ms');
-  }
-});
-```
+import { InlineKeyboardBuilder, createCallbackData } from 'maxbot-js';
 
-## 4. Webhook runtime mode
+const cb = createCallbackData<{ action: string; id: string }>('item');
+const keyboard = new InlineKeyboardBuilder()
+  .button('Open', { callbackData: cb.pack({ action: 'open', id: '42' }) })
+  .row()
+  .build();
 
-```ts
-const controller = new AbortController();
-process.on('SIGINT', () => controller.abort());
+await ctx.reply('Выбери действие', { replyMarkup: keyboard });
 
-await bot.startWebhook(
-  {
-    addr: ':8080',
-    path: '/webhook'
-  },
-  controller.signal
-);
+const parsed = cb.unpack(ctx.callbackData());
+if (parsed?.action === 'open') {
+  await ctx.reply(`open id=${parsed.id}`);
+}
 ```
 
 ## 5. Express adapter integration
@@ -76,10 +75,7 @@ app.use(express.json());
 
 const client = new Client({ token: process.env.BOT_TOKEN!, baseURL: process.env.MAX_API_BASE_URL! });
 const bot = new Bot(client);
-bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
-
 app.post('/webhook', createExpressWebhookHandler(bot, { path: '/webhook' }));
-app.listen(8080);
 ```
 
 ## 6. Fastify adapter integration
@@ -89,13 +85,10 @@ import Fastify from 'fastify';
 import { Bot, Client, createFastifyWebhookHandler } from 'maxbot-js';
 
 const fastify = Fastify();
-
 const client = new Client({ token: process.env.BOT_TOKEN!, baseURL: process.env.MAX_API_BASE_URL! });
 const bot = new Bot(client);
-bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
 fastify.post('/webhook', createFastifyWebhookHandler(bot, { path: '/webhook' }));
-await fastify.listen({ port: 8080, host: '0.0.0.0' });
 ```
 
 ## 7. Retry and rate-limit tuning
@@ -111,53 +104,17 @@ const client = new Client({
 });
 ```
 
-Recommendations:
-
-- Keep `rateLimitRps` at or below your API contract.
-- Keep retries low (`2-3`) to avoid duplicate pressure during incidents.
-- Use `APIError` inspection (`statusCode`, `code`, `retryAfterMs`) for observability.
-
-## 8. Graceful shutdown for polling bots
+## 8. Unit testing with testkit
 
 ```ts
-const controller = new AbortController();
-const stop = () => controller.abort();
+import { createMockClient, createMessageUpdate, updatesResponse } from 'maxbot-js';
 
-process.on('SIGINT', stop);
-process.on('SIGTERM', stop);
-
-await bot.startLongPolling(controller.signal);
-```
-
-## 9. Unit testing bot logic with testkit
-
-```ts
-import { Bot, createMessageUpdate, createMockClient, updatesResponse } from 'maxbot-js';
-
-const { client } = createMockClient({
+const { client, calls } = createMockClient({
   token: 'test-token',
   baseURL: 'https://api.example.test',
-  handler: (url) => {
-    if (url.endsWith('/updates')) return updatesResponse([createMessageUpdate({ text: '/start' })]);
-    return { status: 200, json: { ok: true } };
-  }
+  handler: (url) => (url.endsWith('/updates') ? updatesResponse([createMessageUpdate({ text: '/start' })]) : { status: 200, json: { ok: true } })
 });
 
-const bot = new Bot(client);
-bot.handleCommand('start', (ctx) => ctx.reply('hello'));
-
-await bot.startLongPolling(new AbortController().signal);
-```
-
-## 10. Handling callback queries
-
-```ts
-bot.handleCallback(async (ctx) => {
-  const action = ctx.callbackData();
-  if (action === 'like') {
-    await ctx.reply('Thanks for your feedback!');
-    return;
-  }
-  await ctx.reply(`Unknown action: ${action}`);
-});
+await client.getUpdates();
+console.log(calls.length);
 ```

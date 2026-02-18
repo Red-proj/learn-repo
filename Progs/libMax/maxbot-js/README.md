@@ -7,6 +7,10 @@ Status: `v0.2.0`.
 ## Features
 
 - Typed API client (`getUpdates`, `sendMessage`)
+- Aiogram-like dispatcher layer (`Dispatcher`)
+- Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
+- FSM storage (`MemoryFSMStorage`)
+- Inline keyboard builder and callback-data factory
 - Retry/backoff + `Retry-After` support for retryable API failures
 - Built-in rate limiter policy (`rateLimitRps`, default `30`)
 - Router (`handleCommand`, `handleText`, `handleCallback`)
@@ -40,6 +44,43 @@ bot.handleCommand('start', (ctx) => ctx.reply('hello from maxbot-js'));
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
 await bot.startLongPolling();
+```
+
+## Dispatcher + Filters + FSM
+
+```ts
+import { Dispatcher, filters } from 'maxbot-js';
+
+const dp = new Dispatcher({
+  token: process.env.BOT_TOKEN!,
+  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru'
+});
+
+dp.message([filters.command('start')], async (ctx) => {
+  await ctx.setState('await_name');
+  await ctx.reply('Как тебя зовут?');
+});
+
+dp.message([filters.state('await_name')], async (ctx) => {
+  await ctx.reply(`Приятно познакомиться, ${ctx.messageText()}!`);
+  await ctx.clearState();
+});
+
+await dp.startLongPolling();
+```
+
+## Inline Buttons
+
+```ts
+import { InlineKeyboardBuilder, createCallbackData } from 'maxbot-js';
+
+const cb = createCallbackData<{ action: string; id: string }>('item');
+const keyboard = new InlineKeyboardBuilder()
+  .button('Open', { callbackData: cb.pack({ action: 'open', id: '42' }) })
+  .row()
+  .build();
+
+await ctx.reply('Выбери действие', { replyMarkup: keyboard });
 ```
 
 ## Quick Start (Webhook)
