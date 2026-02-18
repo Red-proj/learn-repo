@@ -8,6 +8,12 @@ Status: `v0.2.0`.
 
 - Typed API client (`getUpdates`, `sendMessage`)
 - Aiogram-like dispatcher layer (`Dispatcher`)
+- Nested dispatch routers (`DispatchRouter`, `Dispatcher#includeRouter`)
+- Router-level filters (`router.useFilter(...)`, `dispatcher.useFilter(...)`)
+- Router/runtime metadata (`setMeta`, `useMeta`, `filters.meta*`)
+- Router-level error handlers (`onError`, bubbling across nested routers)
+- Data filters (`filters.regexMatch`, object-returning custom filters)
+- Structured command filter (`filters.commandMatch`) + `ctx.commandInfo()`
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -70,6 +76,84 @@ dp.message([filters.state('await_name')], async (ctx) => {
 });
 
 await dp.startLongPolling();
+```
+
+## Nested Dispatch Routers
+
+```ts
+import { Dispatcher, DispatchRouter, filters } from 'maxbot-js';
+
+const dp = new Dispatcher({
+  token: process.env.BOT_TOKEN!,
+  baseURL: process.env.MAX_API_BASE_URL ?? 'https://platform-api.max.ru'
+});
+
+const admin = new DispatchRouter();
+admin.use((next) => async (ctx) => {
+  console.log('admin update', ctx.chatID());
+  await next(ctx);
+});
+admin.useFilter(filters.command('ban'));
+admin.setMeta({ role: 'admin' });
+admin.message((ctx) => ctx.reply(`ban args: ${ctx.commandArgs()}`));
+
+const support = new DispatchRouter();
+support.message([filters.command('help')], (ctx) => ctx.reply('support help'));
+
+dp.includeRouters(admin, support);
+await dp.startLongPolling();
+```
+
+## Metadata-Based Routing
+
+```ts
+dp.useMeta((ctx) => ({ transport: ctx.hasCallback() ? 'callback' : 'message' }));
+
+const callbacks = new DispatchRouter();
+callbacks.useFilter(filters.metaEquals('transport', 'callback'));
+callbacks.callbackQuery((ctx) => ctx.reply(`cb=${ctx.callbackData()}`));
+
+dp.includeRouter(callbacks);
+```
+
+## Data From Filters
+
+```ts
+dp.message([filters.regexMatch(/^\/ban\s+(\w+)$/i, 'banMatch')], (ctx) => {
+  const match = ctx.meta<RegExpMatchArray>('banMatch');
+  return ctx.reply(`ban user=${match?.[1] ?? ''}`);
+});
+```
+
+## Structured Command Filter
+
+```ts
+dp.message([filters.commandMatch('ban', 'cmd')], (ctx) => {
+  const cmd = ctx.meta<{ args: string[]; argsText: string }>('cmd');
+  return ctx.reply(`ban target=${cmd?.args[0] ?? ''} reason=${cmd?.argsText ?? ''}`);
+});
+```
+
+## Error Handling
+
+```ts
+dp.onError((error, ctx) => {
+  console.error('dispatch error', error, 'chat', ctx.chatID());
+  return true; // handled, do not rethrow
+});
+```
+
+## Scenes With Router Mount
+
+```ts
+import { Dispatcher, DispatchRouter, SceneManager } from 'maxbot-js';
+
+const dp = new Dispatcher({ token: process.env.BOT_TOKEN!, baseURL: process.env.MAX_API_BASE_URL! });
+const feature = new DispatchRouter();
+const scenes = new SceneManager();
+
+scenes.mount(feature);
+dp.includeRouter(feature);
 ```
 
 ## Inline Buttons

@@ -94,3 +94,74 @@ const { client } = createMockClient({
   handler: (url) => url.endsWith('/updates') ? updatesResponse([createMessageUpdate({ text: '/start' })]) : { status: 200, json: { ok: true } }
 });
 ```
+
+## 11. Nested dispatcher routers
+
+```ts
+const admin = new DispatchRouter();
+admin.use((next) => async (ctx) => {
+  console.log('admin flow', ctx.chatID());
+  await next(ctx);
+});
+admin.useFilter(filters.command('ban'));
+admin.message((ctx) => ctx.reply(`ban args: ${ctx.commandArgs()}`));
+
+dp.includeRouter(admin);
+```
+
+## 12. Mount scenes to feature router
+
+```ts
+const feature = new DispatchRouter();
+const scenes = new SceneManager();
+
+scenes.mount(feature);
+dp.includeRouter(feature);
+```
+
+## 13. Metadata-driven filters
+
+```ts
+dp.useMeta((ctx) => ({ transport: ctx.hasCallback() ? 'callback' : 'message' }));
+
+const callbackOnly = new DispatchRouter();
+callbackOnly.useFilter(filters.metaEquals('transport', 'callback'));
+callbackOnly.callbackQuery((ctx) => ctx.reply(`cb=${ctx.callbackData()}`));
+
+dp.includeRouter(callbackOnly);
+```
+
+## 14. Error handler with bubbling
+
+```ts
+const child = new DispatchRouter();
+child.message(() => {
+  throw new Error('child-failed');
+});
+
+dp.onError((error, ctx) => {
+  console.error('dispatch failed', error, ctx.chatID());
+  return true;
+});
+
+dp.includeRouter(child);
+```
+
+## 15. Extract values in filters
+
+```ts
+dp.message([filters.regexMatch(/^\/ban\s+(\w+)$/i, 'banMatch')], (ctx) => {
+  const match = ctx.meta('banMatch');
+  return ctx.reply(`ban ${Array.isArray(match) ? match[1] : ''}`);
+});
+```
+
+## 16. Structured command parser
+
+```ts
+dp.message([filters.commandMatch('ban', 'cmd')], (ctx) => {
+  const cmd = ctx.meta('cmd');
+  const args = Array.isArray(cmd?.args) ? cmd.args : [];
+  return ctx.reply(`ban target=${args[0] ?? ''}`);
+});
+```

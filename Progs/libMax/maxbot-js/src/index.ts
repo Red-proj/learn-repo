@@ -8,6 +8,8 @@ export * from './adapters/fastify';
 export * from './testkit';
 export * from './filters';
 export * from './dispatcher';
+export * from './dispatcher-router';
 export * from './fsm';
+export * from './scenes';
 export * from './keyboard';
 export * from './callback-data';

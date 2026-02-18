@@ -1,19 +1,13 @@
 import { Client, type ClientConfig } from './client';
-import { Context, type StateAccessor } from './context';
+import { Context, type RuntimeMeta, type StateAccessor } from './context';
+import { DispatchRouter } from './dispatcher-router';
 import { MemoryFSMStorage, type FSMData, type FSMStorage } from './fsm';
 import type { Filter } from './filters';
 import type { ID, Update } from './types';
 
 export type DispatchHandler = (ctx: Context) => Promise<void> | void;
 export type DispatchMiddleware = (next: DispatchHandler) => DispatchHandler;
-
-type UpdateKind = 'message' | 'callback_query' | 'any';
-
-interface RegisteredHandler {
-  kind: UpdateKind;
-  filters: Filter[];
-  handler: DispatchHandler;
-}
+export type DispatchErrorHandler = (error: unknown, ctx: Context) => Promise<boolean | void> | boolean | void;
 
 export interface DispatcherOptions {
   polling?: {
@@ -27,13 +21,13 @@ export interface DispatcherOptions {
 
 export class Dispatcher {
   readonly client: Client;
-  private readonly handlers: RegisteredHandler[] = [];
-  private readonly middlewares: DispatchMiddleware[] = [];
+  readonly router: DispatchRouter;
   private readonly state: FSMStorage;
   private readonly polling: Required<NonNullable<DispatcherOptions['polling']>>;
 
   constructor(clientOrConfig: Client | ClientConfig, options: DispatcherOptions = {}) {
     this.client = clientOrConfig instanceof Client ? clientOrConfig : new Client(clientOrConfig);
+    this.router = new DispatchRouter();
     this.state = options.fsmStorage ?? new MemoryFSMStorage();
     this.polling = {
       offset: options.polling?.offset ?? 0,
@@ -44,38 +38,106 @@ export class Dispatcher {
   }
 
   use(mw: DispatchMiddleware): void {
-    this.middlewares.push(mw);
+    this.router.use(mw);
+  }
+
+  includeRouter(router: DispatchRouter): void {
+    this.router.includeRouter(router);
+  }
+
+  includeRouters(...routers: DispatchRouter[]): void {
+    this.router.includeRouters(...routers);
+  }
+
+  useFilter(...filters: Filter[]): void {
+    this.router.useFilter(...filters);
+  }
+
+  setMeta(patch: RuntimeMeta): void {
+    this.router.setMeta(patch);
+  }
+
+  useMeta(resolver: (ctx: Context) => RuntimeMeta | Promise<RuntimeMeta>): void {
+    this.router.useMeta(resolver);
+  }
+
+  onError(handler: DispatchErrorHandler): void {
+    this.router.onError(handler);
+  }
+
+  onErrorFirst(handler: DispatchErrorHandler): void {
+    this.router.onErrorFirst(handler);
   }
 
   message(handler: DispatchHandler): void;
   message(filters: Filter[], handler: DispatchHandler): void;
   message(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
-    this.add('message', arg1, arg2);
+    if (typeof arg1 === 'function') {
+      this.router.message(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.message(arg1, arg2);
+  }
+
+  messageFirst(handler: DispatchHandler): void;
+  messageFirst(filters: Filter[], handler: DispatchHandler): void;
+  messageFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.messageFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.messageFirst(arg1, arg2);
   }
 
   callbackQuery(handler: DispatchHandler): void;
   callbackQuery(filters: Filter[], handler: DispatchHandler): void;
   callbackQuery(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
-    this.add('callback_query', arg1, arg2);
+    if (typeof arg1 === 'function') {
+      this.router.callbackQuery(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.callbackQuery(arg1, arg2);
+  }
+
+  callbackQueryFirst(handler: DispatchHandler): void;
+  callbackQueryFirst(filters: Filter[], handler: DispatchHandler): void;
+  callbackQueryFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.callbackQueryFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.callbackQueryFirst(arg1, arg2);
   }
 
   any(handler: DispatchHandler): void;
   any(filters: Filter[], handler: DispatchHandler): void;
   any(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
-    this.add('any', arg1, arg2);
+    if (typeof arg1 === 'function') {
+      this.router.any(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.any(arg1, arg2);
+  }
+
+  anyFirst(handler: DispatchHandler): void;
+  anyFirst(filters: Filter[], handler: DispatchHandler): void;
+  anyFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.anyFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.anyFirst(arg1, arg2);
   }
 
   async handleUpdate(update: Update): Promise<boolean> {
     const ctx = new Context(this.client, update, this.stateAccessor());
-
-    for (const item of this.handlers) {
-      if (!matchesKind(item.kind, update)) continue;
-      if (!(await runFilters(item.filters, ctx))) continue;
-      await runChain(this.middlewares, item.handler, ctx);
-      return true;
-    }
-
-    return false;
+    return await this.router.dispatch(update, ctx);
   }
 
   async startLongPolling(signal?: AbortSignal): Promise<void> {
@@ -134,15 +196,6 @@ export class Dispatcher {
     await this.state.clear(chatID);
   }
 
-  private add(kind: UpdateKind, arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
-    if (typeof arg1 === 'function') {
-      this.handlers.push({ kind, filters: [], handler: arg1 });
-      return;
-    }
-    if (!arg2) throw new Error('handler is required');
-    this.handlers.push({ kind, filters: arg1, handler: arg2 });
-  }
-
   private stateAccessor(): StateAccessor {
     return {
       getState: (chatID) => this.state.get(chatID),
@@ -154,27 +207,6 @@ export class Dispatcher {
       clearData: (chatID) => this.state.clearData(chatID)
     };
   }
-}
-
-function matchesKind(kind: UpdateKind, update: Update): boolean {
-  if (kind === 'any') return true;
-  if (kind === 'message') return Boolean(update.message);
-  return Boolean(update.callback_query);
-}
-
-async function runFilters(items: Filter[], ctx: Context): Promise<boolean> {
-  for (const item of items) {
-    if (!(await item(ctx))) return false;
-  }
-  return true;
-}
-
-async function runChain(middlewares: DispatchMiddleware[], handler: DispatchHandler, ctx: Context): Promise<void> {
-  let current = handler;
-  for (let i = middlewares.length - 1; i >= 0; i -= 1) {
-    current = middlewares[i](current);
-  }
-  await current(ctx);
 }
 
 function wait(ms: number, signal?: AbortSignal): Promise<void> {

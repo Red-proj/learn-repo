@@ -16,15 +16,26 @@ export interface ReplyOptions {
   replyMarkup?: Record<string, unknown>;
 }
 
+export type RuntimeMeta = Record<string, unknown>;
+
+export interface ParsedCommand {
+  name: string;
+  mention?: string;
+  argsText: string;
+  args: string[];
+}
+
 export class Context {
   readonly client: Client;
   readonly update: Update;
   private readonly stateAccessor?: StateAccessor;
+  private readonly runtimeMeta: RuntimeMeta;
 
-  constructor(client: Client, update: Update, stateAccessor?: StateAccessor) {
+  constructor(client: Client, update: Update, stateAccessor?: StateAccessor, runtimeMeta: RuntimeMeta = {}) {
     this.client = client;
     this.update = update;
     this.stateAccessor = stateAccessor;
+    this.runtimeMeta = { ...runtimeMeta };
   }
 
   message(): Message | undefined {
@@ -52,11 +63,7 @@ export class Context {
   }
 
   command(): string {
-    const text = this.messageText();
-    if (!text.startsWith('/')) return '';
-    const firstToken = text.slice(1).trim().split(/\s+/)[0] ?? '';
-    const cmd = firstToken.includes('@') ? firstToken.split('@')[0] : firstToken;
-    return cmd.trim().toLowerCase();
+    return this.commandInfo()?.name ?? '';
   }
 
   isCommand(cmd: string): boolean {
@@ -66,16 +73,59 @@ export class Context {
   }
 
   commandArgs(): string {
+    return this.commandInfo()?.argsText ?? '';
+  }
+
+  commandInfo(): ParsedCommand | undefined {
     const text = this.messageText();
-    if (!text.startsWith('/')) return '';
+    if (!text.startsWith('/')) return undefined;
     const trimmed = text.slice(1).trim();
     const firstSpace = trimmed.search(/\s/);
-    if (firstSpace < 0) return '';
-    return trimmed.slice(firstSpace + 1).trim();
+    const commandToken = (firstSpace < 0 ? trimmed : trimmed.slice(0, firstSpace)).trim();
+    if (!commandToken) return undefined;
+
+    const [nameRaw, mentionRaw] = commandToken.split('@', 2);
+    const name = nameRaw.trim().toLowerCase();
+    if (!name) return undefined;
+
+    const argsText = firstSpace < 0 ? '' : trimmed.slice(firstSpace + 1).trim();
+    const args = argsText ? argsText.split(/\s+/) : [];
+    const mention = mentionRaw?.trim();
+
+    return {
+      name,
+      ...(mention ? { mention } : {}),
+      argsText,
+      args
+    };
   }
 
   chatID(): ID | '' {
     return this.update.message?.chat.chat_id ?? this.update.callback_query?.chat?.chat_id ?? this.update.callback_query?.message?.chat.chat_id ?? '';
+  }
+
+  meta<TValue = unknown>(key: string): TValue | undefined {
+    return this.runtimeMeta[key] as TValue | undefined;
+  }
+
+  hasMeta(key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.runtimeMeta, key);
+  }
+
+  setMeta(key: string, value: unknown): void {
+    this.runtimeMeta[key] = value;
+  }
+
+  setMetaMany(patch: RuntimeMeta): void {
+    Object.assign(this.runtimeMeta, patch);
+  }
+
+  metaAll(): Readonly<RuntimeMeta> {
+    return this.runtimeMeta;
+  }
+
+  withMeta(patch: RuntimeMeta): Context {
+    return new Context(this.client, this.update, this.stateAccessor, { ...this.runtimeMeta, ...patch });
   }
 
   async reply(text: string, optionsOrSignal?: ReplyOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<void> {

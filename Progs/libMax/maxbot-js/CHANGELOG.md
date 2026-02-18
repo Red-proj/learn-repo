@@ -2,6 +2,24 @@
 
 All notable changes to `maxbot-js` are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Aiogram-like nested routing for dispatcher via `DispatchRouter`.
+- `Dispatcher#includeRouter(router)` for modular handler composition.
+- `Dispatcher#includeRouters(...routers)` for batch router composition.
+- Router-local middleware chain with parent-to-child propagation.
+- Router-level shared filters via `router.useFilter(...)` and `dispatcher.useFilter(...)`.
+- Router/runtime metadata via `setMeta(...)` and `useMeta(...)`.
+- `SceneManager.mount(...)` now supports dispatch routers for feature-module mounting.
+- Metadata filters: `filters.metaExists`, `filters.metaEquals`, `filters.metaSatisfies`.
+- Router-level error pipeline via `onError(...)` with nested bubbling support.
+- Filters may return metadata objects to enrich `ctx.meta(...)` during dispatch.
+- Added helpers: `filters.regexMatch(...)` and `filters.callbackDataMatch(...)`.
+- Added `ctx.commandInfo()` for structured command parsing (`name`, `mention`, `argsText`, `args`).
+- Added `filters.commandMatch(...)` to route by command and inject parsed command into metadata.
+
 ## [v0.2.0] - 2026-02-18
 
 ### Added
