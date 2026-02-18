@@ -282,3 +282,15 @@ app.post('/webhook', createExpressWebhookHandler(bot, {
   secretToken: process.env.WEBHOOK_SECRET
 }));
 ```
+
+## 28. Skip pending updates on startup
+
+```ts
+const dp = new Dispatcher({
+  token,
+  baseURL,
+  polling: {
+    dropPendingUpdates: true
+  }
+});
+```

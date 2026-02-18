@@ -49,6 +49,7 @@ All notable changes to `maxbot-js` are documented in this file.
   - `startWebhook({ secretToken, secretHeaderName })`
   - `createExpressWebhookHandler(..., { secretToken, secretHeaderName })`
   - `createFastifyWebhookHandler(..., { secretToken, secretHeaderName })`
+- Added `polling.dropPendingUpdates` to skip old queued updates on startup.
 
 ## [v0.2.0] - 2026-02-18
 

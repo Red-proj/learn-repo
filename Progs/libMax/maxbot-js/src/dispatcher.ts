@@ -27,6 +27,7 @@ export interface DispatcherOptions {
     limit?: number;
     timeoutSeconds?: number;
     idleDelayMs?: number;
+    dropPendingUpdates?: boolean;
     recoverErrors?: boolean;
     errorDelayMs?: number;
     maxErrorDelayMs?: number;
@@ -78,6 +79,7 @@ export class Dispatcher {
       limit: options.polling?.limit ?? 100,
       timeoutSeconds: options.polling?.timeoutSeconds ?? 25,
       idleDelayMs: normalizePositive('polling.idleDelayMs', options.polling?.idleDelayMs, 400),
+      dropPendingUpdates: options.polling?.dropPendingUpdates ?? false,
       recoverErrors: options.polling?.recoverErrors ?? true,
       errorDelayMs: normalizePositive('polling.errorDelayMs', options.polling?.errorDelayMs, 250),
       maxErrorDelayMs: normalizePositive('polling.maxErrorDelayMs', options.polling?.maxErrorDelayMs, 5000)
@@ -248,6 +250,9 @@ export class Dispatcher {
 
   private async runLongPolling(signal?: AbortSignal): Promise<void> {
     let offset = this.polling.offset;
+    if (this.polling.dropPendingUpdates) {
+      offset = await this.drainPendingUpdates(offset, signal);
+    }
     let currentErrorDelayMs = this.polling.errorDelayMs;
 
     while (!signal?.aborted && !this.stopping) {
@@ -449,6 +454,37 @@ export class Dispatcher {
       await wait(10);
     }
     return true;
+  }
+
+  private async drainPendingUpdates(offset: number, signal?: AbortSignal): Promise<number> {
+    let nextOffset = offset;
+    while (!signal?.aborted && !this.stopping) {
+      let updates: Update[];
+      try {
+        updates = await this.client.getUpdates(
+          {
+            offset: nextOffset,
+            limit: this.polling.limit,
+            timeout: 0
+          },
+          signal
+        );
+      } catch (error) {
+        if (isAbortError(error)) return nextOffset;
+        throw error;
+      }
+
+      if (!updates.length) {
+        return nextOffset;
+      }
+
+      for (const update of updates) {
+        if (update.update_id >= nextOffset) {
+          nextOffset = update.update_id + 1;
+        }
+      }
+    }
+    return nextOffset;
   }
 }
 

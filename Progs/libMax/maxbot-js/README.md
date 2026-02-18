@@ -25,6 +25,7 @@ Status: `v0.2.0`.
 - Lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`)
 - Polling recovery backoff (`recoverErrors`, `errorDelayMs`, `maxErrorDelayMs`)
 - Webhook secret token validation (`secretToken`, `secretHeaderName`)
+- Polling backlog skip on startup (`dropPendingUpdates`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -204,6 +205,7 @@ const dp = new Dispatcher({
     gracefulShutdownMs: 10_000
   },
   polling: {
+    dropPendingUpdates: true,
     recoverErrors: true,
     errorDelayMs: 250,
     maxErrorDelayMs: 5000

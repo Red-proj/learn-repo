@@ -23,6 +23,7 @@
 - Added polling recovery/backoff options for transient errors.
 - Improved `onError` to catch filter and `useMeta` resolver failures.
 - Added webhook secret token validation options.
+- Added `dropPendingUpdates` polling option.
 
 ## v0.2.0 (2026-02-18)
 
