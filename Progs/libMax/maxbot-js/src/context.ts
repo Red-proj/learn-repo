@@ -74,6 +74,15 @@ export class Context {
     return this.command() === normalized;
   }
 
+  isCommandFor(username: string, options: { allowWithoutMention?: boolean } = {}): boolean {
+    const parsed = this.commandInfo();
+    if (!parsed) return false;
+    const expected = username.trim().replace(/^@/, '').toLowerCase();
+    if (!expected) return false;
+    if (!parsed.mention) return options.allowWithoutMention ?? true;
+    return parsed.mention.toLowerCase() === expected;
+  }
+
   commandArgs(): string {
     return this.commandInfo()?.argsText ?? '';
   }

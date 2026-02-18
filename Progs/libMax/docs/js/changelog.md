@@ -28,6 +28,7 @@
 - Added scene enter options with initial data/reset support.
 - Added dispatcher unhandled update hooks.
 - Added classic bot/router fallback handler `handleAny`.
+- Added command mention filters (`commandAny`, `commandFor`).
 
 ## v0.2.0 (2026-02-18)
 

@@ -331,3 +331,11 @@ dp.onUnhandled((ctx) => ctx.reply('Unknown command or update'));
 ```ts
 bot.handleAny((ctx) => ctx.reply('Unhandled update'));
 ```
+
+## 33. Command mention filter
+
+```ts
+dp.message([filters.commandFor('start', 'mybot')], (ctx) => {
+  return ctx.reply('start for mybot');
+});
+```

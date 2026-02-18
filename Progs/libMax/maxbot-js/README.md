@@ -29,6 +29,7 @@ Status: `v0.2.0`.
 - Scene data/session helpers and `SceneManager.current(...)`
 - Unhandled update hooks (`onUnhandled`, `onUnhandledFirst`)
 - Bot/Router fallback handler (`handleAny`)
+- Advanced command filters (`commandAny`, `commandFor`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -154,6 +155,11 @@ dp.message([filters.commandMatch('ban', 'cmd')], (ctx) => {
   const cmd = ctx.meta<{ args: string[]; argsText: string }>('cmd');
   return ctx.reply(`ban target=${cmd?.args[0] ?? ''} reason=${cmd?.argsText ?? ''}`);
 });
+```
+
+```ts
+dp.message([filters.commandFor('start', 'mybot')], (ctx) => ctx.reply('command for this bot'));
+dp.message([filters.commandAny('help', 'about')], (ctx) => ctx.reply('common command'));
 ```
 
 ## Identity Filters

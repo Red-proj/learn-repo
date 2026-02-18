@@ -11,6 +11,19 @@ export const filters = {
     return (ctx) => ctx.isCommand(normalized);
   },
 
+  commandAny(...commands: string[]): Filter {
+    const allowed = new Set(commands.map(normalizeCommand).filter(Boolean));
+    return (ctx) => {
+      const cmd = ctx.command();
+      return Boolean(cmd) && allowed.has(cmd);
+    };
+  },
+
+  commandFor(command: string, username: string, options: { allowWithoutMention?: boolean } = {}): Filter {
+    const normalized = normalizeCommand(command);
+    return (ctx) => ctx.isCommand(normalized) && ctx.isCommandFor(username, options);
+  },
+
   commandMatch(command?: string, metaKey = 'command'): Filter {
     const normalized = command ? normalizeCommand(command) : '';
     return (ctx) => {

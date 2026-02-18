@@ -31,6 +31,7 @@ Status: `v0.2.0`
 - Scene enter options with initial data (`enter(..., { data, resetData })`)
 - Unhandled update hooks in dispatcher (`onUnhandled`)
 - Bot router fallback handler (`handleAny`)
+- Command mention filters (`commandAny`, `commandFor`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

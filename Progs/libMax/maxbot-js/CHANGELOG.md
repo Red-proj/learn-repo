@@ -61,6 +61,10 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added fallback handler for classic bot/router API:
   - `bot.handleAny(...)`
   - `router.handleAny(...)`
+- Added advanced command filters:
+  - `filters.commandAny(...)`
+  - `filters.commandFor(command, username, { allowWithoutMention? })`
+  - `ctx.isCommandFor(username, ...)`
 
 ## [v0.2.0] - 2026-02-18
 
