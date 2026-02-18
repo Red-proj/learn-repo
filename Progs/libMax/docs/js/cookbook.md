@@ -259,3 +259,17 @@ dp.onShutdown(async () => {
   await closeDB();
 });
 ```
+
+## 26. Polling retry backoff
+
+```ts
+const dp = new Dispatcher({
+  token,
+  baseURL,
+  polling: {
+    recoverErrors: true,
+    errorDelayMs: 250,
+    maxErrorDelayMs: 5000
+  }
+});
+```

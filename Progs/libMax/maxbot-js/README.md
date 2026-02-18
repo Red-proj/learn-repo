@@ -23,6 +23,7 @@ Status: `v0.2.0`.
 - Webhook background mode (`handleInBackground`) for fast ACK
 - Polling lifecycle controls (`isPolling`, `stopLongPolling`)
 - Lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`)
+- Polling recovery backoff (`recoverErrors`, `errorDelayMs`, `maxErrorDelayMs`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -200,6 +201,11 @@ const dp = new Dispatcher({
     orderedBy: 'chat',
     handlerTimeoutMs: 15_000,
     gracefulShutdownMs: 10_000
+  },
+  polling: {
+    recoverErrors: true,
+    errorDelayMs: 250,
+    maxErrorDelayMs: 5000
   }
 });
 

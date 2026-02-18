@@ -20,6 +20,7 @@
 - Added webhook background mode `handleInBackground` for Bot and adapters.
 - Added polling lifecycle controls (`isPolling`, `stopLongPolling`).
 - Added dispatcher lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`).
+- Added polling recovery/backoff options for transient errors.
 
 ## v0.2.0 (2026-02-18)
 

@@ -27,6 +27,9 @@ export interface DispatcherOptions {
     limit?: number;
     timeoutSeconds?: number;
     idleDelayMs?: number;
+    recoverErrors?: boolean;
+    errorDelayMs?: number;
+    maxErrorDelayMs?: number;
   };
   fsmStorage?: FSMStorage;
   fsmStrategy?: FSMStrategy;
@@ -74,8 +77,14 @@ export class Dispatcher {
       offset: options.polling?.offset ?? 0,
       limit: options.polling?.limit ?? 100,
       timeoutSeconds: options.polling?.timeoutSeconds ?? 25,
-      idleDelayMs: options.polling?.idleDelayMs ?? 400
+      idleDelayMs: normalizePositive('polling.idleDelayMs', options.polling?.idleDelayMs, 400),
+      recoverErrors: options.polling?.recoverErrors ?? true,
+      errorDelayMs: normalizePositive('polling.errorDelayMs', options.polling?.errorDelayMs, 250),
+      maxErrorDelayMs: normalizePositive('polling.maxErrorDelayMs', options.polling?.maxErrorDelayMs, 5000)
     };
+    if (this.polling.maxErrorDelayMs < this.polling.errorDelayMs) {
+      throw new Error('polling.maxErrorDelayMs must be >= polling.errorDelayMs');
+    }
   }
 
   use(mw: DispatchMiddleware): void {
@@ -239,6 +248,7 @@ export class Dispatcher {
 
   private async runLongPolling(signal?: AbortSignal): Promise<void> {
     let offset = this.polling.offset;
+    let currentErrorDelayMs = this.polling.errorDelayMs;
 
     while (!signal?.aborted && !this.stopping) {
       let updates: Update[];
@@ -253,8 +263,18 @@ export class Dispatcher {
         );
       } catch (error) {
         if (isAbortError(error)) return;
-        throw error;
+        if (!this.polling.recoverErrors) throw error;
+        try {
+          await wait(currentErrorDelayMs, signal);
+        } catch (waitError) {
+          if (isAbortError(waitError)) return;
+          throw waitError;
+        }
+        currentErrorDelayMs = Math.min(currentErrorDelayMs * 2, this.polling.maxErrorDelayMs);
+        continue;
       }
+
+      currentErrorDelayMs = this.polling.errorDelayMs;
 
       if (!updates.length) {
         try {
@@ -477,6 +497,14 @@ function normalizeTimeout(value: number | undefined): number | undefined {
   if (value === undefined) return undefined;
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error('timeout must be > 0');
+  }
+  return Math.floor(value);
+}
+
+function normalizePositive(field: string, value: number | undefined, fallback: number): number {
+  if (value === undefined) return fallback;
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`${field} must be > 0`);
   }
   return Math.floor(value);
 }

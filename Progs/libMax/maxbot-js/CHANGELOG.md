@@ -40,6 +40,10 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added dispatcher lifecycle hooks:
   - `onStartup(...)` / `onShutdown(...)`
   - `startup()` / `shutdown(...)`
+- Added polling error recovery/backoff options:
+  - `polling.recoverErrors`
+  - `polling.errorDelayMs`
+  - `polling.maxErrorDelayMs`
 
 ## [v0.2.0] - 2026-02-18
 
