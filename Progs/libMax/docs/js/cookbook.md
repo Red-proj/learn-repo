@@ -230,3 +230,12 @@ const dp = new Dispatcher({
 
 await dp.gracefulStop({ timeoutMs: 10_000 });
 ```
+
+## 23. Webhook in background mode
+
+```ts
+app.post('/webhook', createExpressWebhookHandler(bot, {
+  path: '/webhook',
+  handleInBackground: true
+}));
+```

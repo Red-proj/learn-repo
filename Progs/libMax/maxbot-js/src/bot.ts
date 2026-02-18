@@ -13,6 +13,8 @@ export interface PollingOptions {
 export interface WebhookOptions {
   addr?: string;
   path?: string;
+  handleInBackground?: boolean;
+  onDispatchError?: (error: unknown, update: Update) => void | Promise<void>;
 }
 
 export class Bot {
@@ -80,7 +82,7 @@ export class Bot {
     const { host, port } = parseAddr(addr);
 
     const server = createServer(async (req, res) => {
-      await this.handleWebhookRequest(path, req, res);
+      await this.handleWebhookRequest(path, req, res, options);
     });
 
     await new Promise<void>((resolve, reject) => {
@@ -106,7 +108,7 @@ export class Bot {
     });
   }
 
-  private async handleWebhookRequest(path: string, req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private async handleWebhookRequest(path: string, req: IncomingMessage, res: ServerResponse, options: WebhookOptions): Promise<void> {
     const pathname = extractPathname(req.url);
     if (pathname !== path) {
       res.writeHead(404);
@@ -134,11 +136,25 @@ export class Bot {
       return;
     }
 
+    if (options.handleInBackground) {
+      this.handleUpdate(update).catch(async (error) => {
+        if (options.onDispatchError) {
+          await options.onDispatchError(error, update);
+        }
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('{"ok":true}');
+      return;
+    }
+
     try {
       await this.handleUpdate(update);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end('{"ok":true}');
-    } catch {
+    } catch (error) {
+      if (options.onDispatchError) {
+        await options.onDispatchError(error, update);
+      }
       res.writeHead(500);
       res.end('failed to dispatch update');
     }

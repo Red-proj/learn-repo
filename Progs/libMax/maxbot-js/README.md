@@ -20,6 +20,7 @@ Status: `v0.2.0`.
 - Identity filters (`filters.chatID`, `filters.userID`, `filters.chatType`)
 - Group state filters (`filters.stateIn`, `filters.stateGroup`)
 - Processing controls (`maxInFlight`, `orderedBy`, `handlerTimeoutMs`, `gracefulStop`)
+- Webhook background mode (`handleInBackground`) for fast ACK
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -282,7 +283,7 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
-await bot.startWebhook({ addr: ':8080', path: '/webhook' });
+await bot.startWebhook({ addr: ':8080', path: '/webhook', handleInBackground: true });
 ```
 
 ## Express Adapter
@@ -298,7 +299,7 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
-app.post('/webhook', createExpressWebhookHandler(bot, { path: '/webhook' }));
+app.post('/webhook', createExpressWebhookHandler(bot, { path: '/webhook', handleInBackground: true }));
 ```
 
 ## Fastify Adapter
@@ -314,7 +315,7 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
 
-fastify.post('/webhook', createFastifyWebhookHandler(bot, { path: '/webhook' }));
+fastify.post('/webhook', createFastifyWebhookHandler(bot, { path: '/webhook', handleInBackground: true }));
 ```
 
 ## Build

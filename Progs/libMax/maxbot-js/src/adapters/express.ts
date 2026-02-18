@@ -15,6 +15,8 @@ export interface ExpressLikeResponse {
 
 export interface ExpressWebhookAdapterOptions {
   path?: string;
+  handleInBackground?: boolean;
+  onDispatchError?: (error: unknown, update: Update) => void | Promise<void>;
 }
 
 export function createExpressWebhookHandler(bot: Bot, options: ExpressWebhookAdapterOptions = {}) {
@@ -38,10 +40,23 @@ export function createExpressWebhookHandler(bot: Bot, options: ExpressWebhookAda
       return;
     }
 
+    if (options.handleInBackground) {
+      Promise.resolve(bot.handleUpdate(update)).catch(async (error) => {
+        if (options.onDispatchError) {
+          await options.onDispatchError(error, update);
+        }
+      });
+      res.status(200).json({ ok: true });
+      return;
+    }
+
     try {
       await bot.handleUpdate(update);
       res.status(200).json({ ok: true });
-    } catch {
+    } catch (error) {
+      if (options.onDispatchError) {
+        await options.onDispatchError(error, update);
+      }
       res.status(500).json({ error: 'failed to dispatch update' });
     }
   };

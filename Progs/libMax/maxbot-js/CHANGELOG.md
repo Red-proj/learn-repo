@@ -30,6 +30,10 @@ All notable changes to `maxbot-js` are documented in this file.
   - `processing.orderedBy` (`none`, `chat`, `user`, `fsm`)
   - `processing.handlerTimeoutMs`
   - `gracefulStop(...)` with optional timeout.
+- Added webhook background dispatch mode:
+  - `startWebhook({ handleInBackground: true })`
+  - `createExpressWebhookHandler(..., { handleInBackground: true })`
+  - `createFastifyWebhookHandler(..., { handleInBackground: true })`
 
 ## [v0.2.0] - 2026-02-18
 

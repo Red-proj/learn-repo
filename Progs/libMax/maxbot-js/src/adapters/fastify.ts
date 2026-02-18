@@ -14,6 +14,8 @@ export interface FastifyLikeReply {
 
 export interface FastifyWebhookAdapterOptions {
   path?: string;
+  handleInBackground?: boolean;
+  onDispatchError?: (error: unknown, update: Update) => void | Promise<void>;
 }
 
 export function createFastifyWebhookHandler(bot: Bot, options: FastifyWebhookAdapterOptions = {}) {
@@ -37,10 +39,23 @@ export function createFastifyWebhookHandler(bot: Bot, options: FastifyWebhookAda
       return;
     }
 
+    if (options.handleInBackground) {
+      Promise.resolve(bot.handleUpdate(update)).catch(async (error) => {
+        if (options.onDispatchError) {
+          await options.onDispatchError(error, update);
+        }
+      });
+      reply.code(200).send({ ok: true });
+      return;
+    }
+
     try {
       await bot.handleUpdate(update);
       reply.code(200).send({ ok: true });
-    } catch {
+    } catch (error) {
+      if (options.onDispatchError) {
+        await options.onDispatchError(error, update);
+      }
       reply.code(500).send({ error: 'failed to dispatch update' });
     }
   };
