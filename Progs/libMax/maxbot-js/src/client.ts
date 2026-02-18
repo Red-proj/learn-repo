@@ -1,4 +1,10 @@
-import type { GetUpdatesOptions, SendMessageRequest, Update } from './types';
+import type {
+  AnswerCallbackQueryRequest,
+  EditMessageTextRequest,
+  GetUpdatesOptions,
+  SendMessageRequest,
+  Update
+} from './types';
 
 export interface ClientConfig {
   token: string;
@@ -79,6 +85,14 @@ export class Client {
 
   async sendMessage(req: SendMessageRequest, signal?: AbortSignal): Promise<void> {
     await this.request('POST', '/messages', JSON.stringify(req), signal, 'application/json');
+  }
+
+  async editMessageText(req: EditMessageTextRequest, signal?: AbortSignal): Promise<void> {
+    await this.request('PATCH', '/messages', JSON.stringify(req), signal, 'application/json');
+  }
+
+  async answerCallbackQuery(req: AnswerCallbackQueryRequest, signal?: AbortSignal): Promise<void> {
+    await this.request('POST', '/callbacks/answer', JSON.stringify(req), signal, 'application/json');
   }
 
   private async request(method: string, path: string, body?: string, signal?: AbortSignal, contentType?: string): Promise<string> {

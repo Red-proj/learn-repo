@@ -366,3 +366,28 @@ dp.message([filters.commandFor('start', 'mybot')], (ctx) => {
 const result = await dp.handleUpdates(updates, { concurrent: true });
 console.log(result.handled, result.total);
 ```
+
+## 35. Extended observers
+
+```ts
+dp.inlineQuery((ctx) => console.log(ctx.userID(), ctx.inlineQuery()?.query));
+dp.chatJoinRequest((ctx) => console.log(ctx.chatID(), ctx.userID()));
+dp.pollAnswer((ctx) => console.log(ctx.pollAnswer()?.poll_id));
+```
+
+## 36. Update-type filter
+
+```ts
+dp.any([filters.updateType('inline_query', 'chat_join_request')], (ctx) => {
+  console.log('kind', ctx.updateType());
+});
+```
+
+## 37. Callback/message actions
+
+```ts
+dp.callbackQuery(async (ctx) => {
+  await ctx.answerCallback('Saved');
+  await ctx.editMessage('Done');
+});
+```

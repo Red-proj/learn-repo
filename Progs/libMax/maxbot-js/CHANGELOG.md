@@ -76,6 +76,18 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added scene session transitions:
   - `scene.enter(id, stepOrOptions?)`
   - `scene.current()`
+- Added extended dispatcher observers:
+  - `channelPost`, `editedChannelPost`
+  - `inlineQuery`, `chosenInlineResult`
+  - `shippingQuery`, `preCheckoutQuery`
+  - `poll`, `pollAnswer`
+  - `myChatMember`, `chatMember`, `chatJoinRequest`
+- Added update-kind filters:
+  - `filters.updateType(...)`
+  - `filters.notUpdateType(...)`
+- Added context/client action helpers:
+  - `ctx.answerCallback(...)`, `ctx.editMessage(...)`
+  - `client.answerCallbackQuery(...)`, `client.editMessageText(...)`
 
 ## [v0.2.0] - 2026-02-18
 

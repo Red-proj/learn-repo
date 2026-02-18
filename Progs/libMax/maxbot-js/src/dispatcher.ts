@@ -209,6 +209,248 @@ export class Dispatcher {
     this.router.editedMessageFirst(arg1, arg2);
   }
 
+  channelPost(handler: DispatchHandler): void;
+  channelPost(filters: Filter[], handler: DispatchHandler): void;
+  channelPost(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.channelPost(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.channelPost(arg1, arg2);
+  }
+
+  channelPostFirst(handler: DispatchHandler): void;
+  channelPostFirst(filters: Filter[], handler: DispatchHandler): void;
+  channelPostFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.channelPostFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.channelPostFirst(arg1, arg2);
+  }
+
+  editedChannelPost(handler: DispatchHandler): void;
+  editedChannelPost(filters: Filter[], handler: DispatchHandler): void;
+  editedChannelPost(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.editedChannelPost(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.editedChannelPost(arg1, arg2);
+  }
+
+  editedChannelPostFirst(handler: DispatchHandler): void;
+  editedChannelPostFirst(filters: Filter[], handler: DispatchHandler): void;
+  editedChannelPostFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.editedChannelPostFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.editedChannelPostFirst(arg1, arg2);
+  }
+
+  inlineQuery(handler: DispatchHandler): void;
+  inlineQuery(filters: Filter[], handler: DispatchHandler): void;
+  inlineQuery(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.inlineQuery(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.inlineQuery(arg1, arg2);
+  }
+
+  inlineQueryFirst(handler: DispatchHandler): void;
+  inlineQueryFirst(filters: Filter[], handler: DispatchHandler): void;
+  inlineQueryFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.inlineQueryFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.inlineQueryFirst(arg1, arg2);
+  }
+
+  chosenInlineResult(handler: DispatchHandler): void;
+  chosenInlineResult(filters: Filter[], handler: DispatchHandler): void;
+  chosenInlineResult(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.chosenInlineResult(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.chosenInlineResult(arg1, arg2);
+  }
+
+  chosenInlineResultFirst(handler: DispatchHandler): void;
+  chosenInlineResultFirst(filters: Filter[], handler: DispatchHandler): void;
+  chosenInlineResultFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.chosenInlineResultFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.chosenInlineResultFirst(arg1, arg2);
+  }
+
+  shippingQuery(handler: DispatchHandler): void;
+  shippingQuery(filters: Filter[], handler: DispatchHandler): void;
+  shippingQuery(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.shippingQuery(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.shippingQuery(arg1, arg2);
+  }
+
+  shippingQueryFirst(handler: DispatchHandler): void;
+  shippingQueryFirst(filters: Filter[], handler: DispatchHandler): void;
+  shippingQueryFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.shippingQueryFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.shippingQueryFirst(arg1, arg2);
+  }
+
+  preCheckoutQuery(handler: DispatchHandler): void;
+  preCheckoutQuery(filters: Filter[], handler: DispatchHandler): void;
+  preCheckoutQuery(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.preCheckoutQuery(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.preCheckoutQuery(arg1, arg2);
+  }
+
+  preCheckoutQueryFirst(handler: DispatchHandler): void;
+  preCheckoutQueryFirst(filters: Filter[], handler: DispatchHandler): void;
+  preCheckoutQueryFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.preCheckoutQueryFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.preCheckoutQueryFirst(arg1, arg2);
+  }
+
+  poll(handler: DispatchHandler): void;
+  poll(filters: Filter[], handler: DispatchHandler): void;
+  poll(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.poll(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.poll(arg1, arg2);
+  }
+
+  pollFirst(handler: DispatchHandler): void;
+  pollFirst(filters: Filter[], handler: DispatchHandler): void;
+  pollFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.pollFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.pollFirst(arg1, arg2);
+  }
+
+  pollAnswer(handler: DispatchHandler): void;
+  pollAnswer(filters: Filter[], handler: DispatchHandler): void;
+  pollAnswer(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.pollAnswer(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.pollAnswer(arg1, arg2);
+  }
+
+  pollAnswerFirst(handler: DispatchHandler): void;
+  pollAnswerFirst(filters: Filter[], handler: DispatchHandler): void;
+  pollAnswerFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.pollAnswerFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.pollAnswerFirst(arg1, arg2);
+  }
+
+  myChatMember(handler: DispatchHandler): void;
+  myChatMember(filters: Filter[], handler: DispatchHandler): void;
+  myChatMember(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.myChatMember(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.myChatMember(arg1, arg2);
+  }
+
+  myChatMemberFirst(handler: DispatchHandler): void;
+  myChatMemberFirst(filters: Filter[], handler: DispatchHandler): void;
+  myChatMemberFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.myChatMemberFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.myChatMemberFirst(arg1, arg2);
+  }
+
+  chatMember(handler: DispatchHandler): void;
+  chatMember(filters: Filter[], handler: DispatchHandler): void;
+  chatMember(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.chatMember(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.chatMember(arg1, arg2);
+  }
+
+  chatMemberFirst(handler: DispatchHandler): void;
+  chatMemberFirst(filters: Filter[], handler: DispatchHandler): void;
+  chatMemberFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.chatMemberFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.chatMemberFirst(arg1, arg2);
+  }
+
+  chatJoinRequest(handler: DispatchHandler): void;
+  chatJoinRequest(filters: Filter[], handler: DispatchHandler): void;
+  chatJoinRequest(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.chatJoinRequest(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.chatJoinRequest(arg1, arg2);
+  }
+
+  chatJoinRequestFirst(handler: DispatchHandler): void;
+  chatJoinRequestFirst(filters: Filter[], handler: DispatchHandler): void;
+  chatJoinRequestFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.chatJoinRequestFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.chatJoinRequestFirst(arg1, arg2);
+  }
+
   any(handler: DispatchHandler): void;
   any(filters: Filter[], handler: DispatchHandler): void;
   any(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
@@ -571,8 +813,33 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
 function resolveFSMKey(update: Update, strategy: FSMStrategy): ID | '' {
   if (strategy === 'global') return 'global';
 
-  const chatID = update.message?.chat.chat_id ?? update.callback_query?.chat?.chat_id ?? update.callback_query?.message?.chat.chat_id ?? '';
-  const userID = update.message?.sender?.user_id ?? update.callback_query?.from?.user_id ?? update.callback_query?.message?.sender?.user_id ?? '';
+  const chatID =
+    update.message?.chat.chat_id ??
+    update.edited_message?.chat.chat_id ??
+    update.channel_post?.chat.chat_id ??
+    update.edited_channel_post?.chat.chat_id ??
+    update.callback_query?.chat?.chat_id ??
+    update.callback_query?.message?.chat.chat_id ??
+    update.my_chat_member?.chat.chat_id ??
+    update.chat_member?.chat.chat_id ??
+    update.chat_join_request?.chat.chat_id ??
+    '';
+  const userID =
+    update.message?.sender?.user_id ??
+    update.edited_message?.sender?.user_id ??
+    update.channel_post?.sender?.user_id ??
+    update.edited_channel_post?.sender?.user_id ??
+    update.callback_query?.from?.user_id ??
+    update.callback_query?.message?.sender?.user_id ??
+    update.inline_query?.from?.user_id ??
+    update.chosen_inline_result?.from?.user_id ??
+    update.shipping_query?.from?.user_id ??
+    update.pre_checkout_query?.from?.user_id ??
+    update.poll_answer?.user?.user_id ??
+    update.my_chat_member?.from?.user_id ??
+    update.chat_member?.from?.user_id ??
+    update.chat_join_request?.from?.user_id ??
+    '';
 
   if (strategy === 'chat') return chatID;
   if (strategy === 'user') return userID;

@@ -36,6 +36,9 @@ Status: `v0.2.0`
 - Batch update processing (`handleUpdates`)
 - Typed callback-data codecs + meta injection from `cb.filter(...)`
 - Edited message observer in dispatcher (`editedMessage`)
+- Extended dispatcher observers (`inlineQuery`, `pollAnswer`, `chatJoinRequest`, etc.)
+- Update-type routing filters (`updateType`, `notUpdateType`)
+- Context callback/message action helpers (`answerCallback`, `editMessage`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

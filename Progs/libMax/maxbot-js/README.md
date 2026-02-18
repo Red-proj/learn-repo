@@ -33,6 +33,15 @@ Status: `v0.2.0`.
 - Advanced command filters (`commandAny`, `commandFor`)
 - Batch update handling (`handleUpdates`)
 - Edited message observer in dispatcher (`editedMessage`, `editedMessageFirst`)
+- Extended dispatcher observers:
+  - `channelPost`, `editedChannelPost`
+  - `inlineQuery`, `chosenInlineResult`
+  - `shippingQuery`, `preCheckoutQuery`
+  - `poll`, `pollAnswer`
+  - `myChatMember`, `chatMember`, `chatJoinRequest`
+- Update-type filters (`filters.updateType`, `filters.notUpdateType`)
+- Context action helpers (`ctx.answerCallback`, `ctx.editMessage`)
+- Client methods (`answerCallbackQuery`, `editMessageText`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -109,6 +118,23 @@ await dp.startLongPolling();
 ```ts
 dp.editedMessage([filters.command('ban')], async (ctx) => {
   await ctx.reply(`edited /ban args: ${ctx.commandArgs()}`);
+});
+```
+
+## Extended Observers
+
+```ts
+dp.inlineQuery((ctx) => console.log('inline', ctx.userID()));
+dp.chatJoinRequest((ctx) => console.log('join request', ctx.chatID(), ctx.userID()));
+dp.pollAnswer((ctx) => console.log('poll answer', ctx.userID()));
+```
+
+## Callback Actions
+
+```ts
+dp.callbackQuery(async (ctx) => {
+  await ctx.answerCallback('Done');
+  await ctx.editMessage('Updated text');
 });
 ```
 

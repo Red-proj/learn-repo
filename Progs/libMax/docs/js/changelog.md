@@ -33,6 +33,9 @@
 - Improved callback-data helper with typed codecs and metadata injection from `filter(...)`.
 - Added dispatcher observer for edited messages (`editedMessage`, `editedMessageFirst`).
 - Added scene session transitions (`scene.enter(...)`, `scene.current()`).
+- Added extended dispatcher observers for inline/payment/poll/member updates.
+- Added `filters.updateType(...)` / `filters.notUpdateType(...)`.
+- Added context/client helpers for callback answer and message edit.
 
 ## v0.2.0 (2026-02-18)
 

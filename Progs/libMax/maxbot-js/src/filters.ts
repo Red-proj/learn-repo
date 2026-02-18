@@ -34,6 +34,16 @@ export const filters = {
     };
   },
 
+  updateType(...types: string[]): Filter {
+    const allowed = new Set(types.map((x) => x.trim()).filter(Boolean));
+    return (ctx) => allowed.has(ctx.updateType());
+  },
+
+  notUpdateType(...types: string[]): Filter {
+    const blocked = new Set(types.map((x) => x.trim()).filter(Boolean));
+    return (ctx) => !blocked.has(ctx.updateType());
+  },
+
   text(): Filter {
     return (ctx) => ctx.hasMessage() && ctx.messageText().length > 0;
   },
