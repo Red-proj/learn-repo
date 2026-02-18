@@ -73,6 +73,9 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added edited message support in dispatcher:
   - `dispatcher.editedMessage(...)`
   - `dispatcher.editedMessageFirst(...)`
+- Added scene session transitions:
+  - `scene.enter(id, stepOrOptions?)`
+  - `scene.current()`
 
 ## [v0.2.0] - 2026-02-18
 

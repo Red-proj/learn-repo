@@ -32,6 +32,7 @@
 - Added batch update processing API (`handleUpdates`).
 - Improved callback-data helper with typed codecs and metadata injection from `filter(...)`.
 - Added dispatcher observer for edited messages (`editedMessage`, `editedMessageFirst`).
+- Added scene session transitions (`scene.enter(...)`, `scene.current()`).
 
 ## v0.2.0 (2026-02-18)
 

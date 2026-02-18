@@ -89,3 +89,40 @@ test('enter options can seed and reset scene data', async () => {
 
   assert.deepEqual(seen, ['c1:u1']);
 });
+
+test('scene session can switch to another scene via scene.enter', async () => {
+  const dp = createDispatcher();
+  const scenes = new SceneManager();
+  const seen = [];
+
+  scenes.registerScene('first', async (_ctx, scene) => {
+    seen.push(`first:${scene.step}`);
+    await scene.enter('second', { step: 2 });
+  });
+
+  scenes.registerWizard('second', [
+    async () => {
+      seen.push('second:0');
+    },
+    async () => {
+      seen.push('second:1');
+    },
+    async (_ctx, scene) => {
+      const current = await scene.current();
+      seen.push(`second:${scene.step}:${current?.id ?? ''}:${current?.step ?? -1}`);
+      await scene.leave();
+    }
+  ]);
+
+  scenes.mount(dp);
+
+  dp.message([filters.command('start')], async (ctx) => {
+    await scenes.enter(ctx, 'first');
+  });
+
+  await dp.handleUpdate(createMessageUpdate({ chatID: 'chat-1', text: '/start' }));
+  await dp.handleUpdate(createMessageUpdate({ chatID: 'chat-1', text: 'next' }));
+  await dp.handleUpdate(createMessageUpdate({ chatID: 'chat-1', text: 'go' }));
+
+  assert.deepEqual(seen, ['first:0', 'second:2:second:2']);
+});

@@ -332,6 +332,14 @@ await scenes.enter(ctx, 'checkout', {
 });
 ```
 
+## 30.1 Switch scenes inside wizard handler
+
+```ts
+scenes.registerScene('first', async (_ctx, scene) => {
+  await scene.enter('second', { step: 1, data: { source: 'first' } });
+});
+```
+
 ## 31. Unhandled update fallback
 
 ```ts

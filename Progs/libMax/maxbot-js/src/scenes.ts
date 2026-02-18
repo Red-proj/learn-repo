@@ -43,9 +43,11 @@ export class SceneSession {
   readonly id: string;
   readonly step: number;
   private readonly ctx: Context;
+  private readonly manager: SceneManager;
 
-  constructor(ctx: Context, id: string, step: number) {
+  constructor(ctx: Context, manager: SceneManager, id: string, step: number) {
     this.ctx = ctx;
+    this.manager = manager;
     this.id = id;
     this.step = step;
   }
@@ -64,6 +66,14 @@ export class SceneSession {
 
   async leave(): Promise<void> {
     await this.ctx.clearState();
+  }
+
+  async enter(id: string, stepOrOptions: number | SceneEnterOptions = 0): Promise<void> {
+    await this.manager.enter(this.ctx, id, stepOrOptions);
+  }
+
+  async current(): Promise<{ id: string; step: number } | null> {
+    return await this.manager.current(this.ctx);
   }
 
   async getData<TData extends FSMData = FSMData>(): Promise<TData> {
@@ -115,7 +125,7 @@ export class SceneManager {
     if (previous) {
       const prevScene = this.scenes.get(previous.sceneID);
       if (prevScene?.leave) {
-        await prevScene.leave(ctx, new SceneSession(ctx, previous.sceneID, previous.step));
+        await prevScene.leave(ctx, this.createSession(ctx, previous.sceneID, previous.step));
       }
     }
 
@@ -128,7 +138,7 @@ export class SceneManager {
 
     await ctx.setState(encodeSceneState(sceneID, options.step));
     if (target.enter) {
-      await target.enter(ctx, new SceneSession(ctx, sceneID, Math.max(0, options.step)));
+      await target.enter(ctx, this.createSession(ctx, sceneID, Math.max(0, options.step)));
     }
   }
 
@@ -137,7 +147,7 @@ export class SceneManager {
     if (!current) return;
     const target = this.scenes.get(current.sceneID);
     if (target?.leave) {
-      await target.leave(ctx, new SceneSession(ctx, current.sceneID, current.step));
+      await target.leave(ctx, this.createSession(ctx, current.sceneID, current.step));
     }
     await ctx.clearState();
   }
@@ -158,7 +168,7 @@ export class SceneManager {
       return false;
     }
 
-    const session = new SceneSession(ctx, parsed.sceneID, parsed.step);
+    const session = this.createSession(ctx, parsed.sceneID, parsed.step);
     if (target.kind === 'scene') {
       await target.handler(ctx, session);
       return true;
@@ -172,6 +182,10 @@ export class SceneManager {
 
     await stepHandler(ctx, session);
     return true;
+  }
+
+  private createSession(ctx: Context, id: string, step: number): SceneSession {
+    return new SceneSession(ctx, this, id, step);
   }
 }
 

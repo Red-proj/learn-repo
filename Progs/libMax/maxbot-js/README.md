@@ -27,6 +27,7 @@ Status: `v0.2.0`.
 - Webhook secret token validation (`secretToken`, `secretHeaderName`)
 - Polling backlog skip on startup (`dropPendingUpdates`)
 - Scene data/session helpers and `SceneManager.current(...)`
+- Scene-to-scene transitions from session (`scene.enter(...)`)
 - Unhandled update hooks (`onUnhandled`, `onUnhandledFirst`)
 - Bot/Router fallback handler (`handleAny`)
 - Advanced command filters (`commandAny`, `commandFor`)
@@ -321,6 +322,11 @@ await scenes.enter(ctx, 'checkout', {
   data: { cartID: 'c1' },
   resetData: true
 });
+```
+
+```ts
+// inside scene handler:
+await scene.enter('checkout', { step: 1, data: { cartID: 'c2' } });
 ```
 
 ## Inline Buttons

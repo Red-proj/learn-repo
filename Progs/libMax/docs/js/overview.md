@@ -29,6 +29,7 @@ Status: `v0.2.0`
 - Polling option `dropPendingUpdates` to skip old backlog on startup
 - Scene session data helpers and `SceneManager.current(...)`
 - Scene enter options with initial data (`enter(..., { data, resetData })`)
+- Scene transitions from handler session (`scene.enter(...)`)
 - Unhandled update hooks in dispatcher (`onUnhandled`)
 - Bot router fallback handler (`handleAny`)
 - Command mention filters (`commandAny`, `commandFor`)
