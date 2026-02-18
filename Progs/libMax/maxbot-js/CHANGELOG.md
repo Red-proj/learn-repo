@@ -58,6 +58,9 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added dispatcher unhandled update hooks:
   - `onUnhandled(...)`
   - `onUnhandledFirst(...)`
+- Added fallback handler for classic bot/router API:
+  - `bot.handleAny(...)`
+  - `router.handleAny(...)`
 
 ## [v0.2.0] - 2026-02-18
 

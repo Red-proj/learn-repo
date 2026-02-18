@@ -9,6 +9,7 @@ export class Router {
   private readonly commands = new Map<string, Handler>();
   private onText?: Handler;
   private onCallback?: Handler;
+  private onAny?: Handler;
   private readonly middlewares: Middleware[] = [];
 
   use(mw: Middleware): void {
@@ -29,6 +30,10 @@ export class Router {
     this.onCallback = handler;
   }
 
+  handleAny(handler: Handler): void {
+    this.onAny = handler;
+  }
+
   async dispatch(client: Client, update: Update): Promise<void> {
     const ctx = new Context(client, update);
 
@@ -40,12 +45,22 @@ export class Router {
       }
       if (this.onText) {
         await runChain(this.middlewares, this.onText, ctx);
+        return;
+      }
+      if (this.onAny) {
+        await runChain(this.middlewares, this.onAny, ctx);
       }
       return;
     }
 
-    if (update.callback_query && this.onCallback) {
-      await runChain(this.middlewares, this.onCallback, ctx);
+    if (update.callback_query) {
+      if (this.onCallback) {
+        await runChain(this.middlewares, this.onCallback, ctx);
+        return;
+      }
+      if (this.onAny) {
+        await runChain(this.middlewares, this.onAny, ctx);
+      }
     }
   }
 }

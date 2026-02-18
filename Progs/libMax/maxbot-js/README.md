@@ -28,6 +28,7 @@ Status: `v0.2.0`.
 - Polling backlog skip on startup (`dropPendingUpdates`)
 - Scene data/session helpers and `SceneManager.current(...)`
 - Unhandled update hooks (`onUnhandled`, `onUnhandledFirst`)
+- Bot/Router fallback handler (`handleAny`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -62,6 +63,7 @@ const client = new Client({
 const bot = new Bot(client);
 bot.handleCommand('start', (ctx) => ctx.reply('hello from maxbot-js'));
 bot.handleText((ctx) => ctx.reply(`echo: ${ctx.messageText()}`));
+bot.handleAny((ctx) => ctx.reply('unknown update'));
 
 await bot.startLongPolling();
 ```

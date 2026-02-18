@@ -325,3 +325,9 @@ await scenes.enter(ctx, 'checkout', {
 ```ts
 dp.onUnhandled((ctx) => ctx.reply('Unknown command or update'));
 ```
+
+## 32. Bot fallback handler
+
+```ts
+bot.handleAny((ctx) => ctx.reply('Unhandled update'));
+```

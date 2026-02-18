@@ -51,6 +51,10 @@ export class Bot {
     this.router.handleCallback(handler);
   }
 
+  handleAny(handler: Handler): void {
+    this.router.handleAny(handler);
+  }
+
   async startLongPolling(signal?: AbortSignal): Promise<void> {
     let offset = this.polling.offset;
 
