@@ -3,7 +3,7 @@ import type { DispatchErrorHandler, DispatchHandler, DispatchMiddleware } from '
 import type { Filter, FilterResult } from './filters';
 import type { Update } from './types';
 
-type UpdateKind = 'message' | 'callback_query' | 'any';
+type UpdateKind = 'message' | 'edited_message' | 'callback_query' | 'any';
 
 interface RegisteredHandler {
   kind: UpdateKind;
@@ -81,6 +81,18 @@ export class DispatchRouter {
   callbackQueryFirst(filters: Filter[], handler: DispatchHandler): void;
   callbackQueryFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
     this.add('callback_query', arg1, arg2, true);
+  }
+
+  editedMessage(handler: DispatchHandler): void;
+  editedMessage(filters: Filter[], handler: DispatchHandler): void;
+  editedMessage(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    this.add('edited_message', arg1, arg2, false);
+  }
+
+  editedMessageFirst(handler: DispatchHandler): void;
+  editedMessageFirst(filters: Filter[], handler: DispatchHandler): void;
+  editedMessageFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    this.add('edited_message', arg1, arg2, true);
   }
 
   any(handler: DispatchHandler): void;
@@ -173,6 +185,7 @@ export class DispatchRouter {
 function matchesKind(kind: UpdateKind, update: Update): boolean {
   if (kind === 'any') return true;
   if (kind === 'message') return Boolean(update.message);
+  if (kind === 'edited_message') return Boolean(update.edited_message);
   return Boolean(update.callback_query);
 }
 

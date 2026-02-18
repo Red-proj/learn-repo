@@ -3,6 +3,7 @@ export type ID = string;
 export interface Update {
   update_id: number;
   message?: Message;
+  edited_message?: Message;
   callback_query?: CallbackQuery;
 }
 

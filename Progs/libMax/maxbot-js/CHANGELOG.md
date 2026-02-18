@@ -70,6 +70,9 @@ All notable changes to `maxbot-js` are documented in this file.
 - Improved callback-data factory:
   - typed `unpack` with codecs (`string|number|boolean|custom`)
   - `cb.filter(...)` now injects parsed payload into `ctx.meta(...)`
+- Added edited message support in dispatcher:
+  - `dispatcher.editedMessage(...)`
+  - `dispatcher.editedMessageFirst(...)`
 
 ## [v0.2.0] - 2026-02-18
 

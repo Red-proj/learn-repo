@@ -31,6 +31,7 @@ Status: `v0.2.0`.
 - Bot/Router fallback handler (`handleAny`)
 - Advanced command filters (`commandAny`, `commandFor`)
 - Batch update handling (`handleUpdates`)
+- Edited message observer in dispatcher (`editedMessage`, `editedMessageFirst`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -100,6 +101,14 @@ dp.message([filters.state('await_name')], async (ctx) => {
 });
 
 await dp.startLongPolling();
+```
+
+## Edited Message Handler
+
+```ts
+dp.editedMessage([filters.command('ban')], async (ctx) => {
+  await ctx.reply(`edited /ban args: ${ctx.commandArgs()}`);
+});
 ```
 
 ## Nested Dispatch Routers

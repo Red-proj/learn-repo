@@ -64,6 +64,14 @@ dp.message([filters.command('ban')], async (ctx) => {
 });
 ```
 
+## 6.1 Edited message observer
+
+```ts
+dp.editedMessage([filters.command('ban')], async (ctx) => {
+  await ctx.reply(`edited args: ${ctx.commandArgs()}`);
+});
+```
+
 ## 7. Express adapter
 
 ```ts

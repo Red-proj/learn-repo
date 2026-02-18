@@ -34,6 +34,7 @@ Status: `v0.2.0`
 - Command mention filters (`commandAny`, `commandFor`)
 - Batch update processing (`handleUpdates`)
 - Typed callback-data codecs + meta injection from `cb.filter(...)`
+- Edited message observer in dispatcher (`editedMessage`)
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

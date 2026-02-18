@@ -41,7 +41,11 @@ export class Context {
   }
 
   message(): Message | undefined {
-    return this.update.message;
+    return this.update.message ?? this.update.edited_message;
+  }
+
+  editedMessage(): Message | undefined {
+    return this.update.edited_message;
   }
 
   callback(): CallbackQuery | undefined {
@@ -49,7 +53,11 @@ export class Context {
   }
 
   hasMessage(): boolean {
-    return Boolean(this.update.message);
+    return Boolean(this.update.message ?? this.update.edited_message);
+  }
+
+  hasEditedMessage(): boolean {
+    return Boolean(this.update.edited_message);
   }
 
   hasCallback(): boolean {
@@ -57,7 +65,7 @@ export class Context {
   }
 
   messageText(): string {
-    return this.update.message?.text?.trim() ?? '';
+    return this.message()?.text?.trim() ?? '';
   }
 
   callbackData(): string {
@@ -112,15 +120,15 @@ export class Context {
   }
 
   chatID(): ID | '' {
-    return this.update.message?.chat.chat_id ?? this.update.callback_query?.chat?.chat_id ?? this.update.callback_query?.message?.chat.chat_id ?? '';
+    return this.message()?.chat.chat_id ?? this.update.callback_query?.chat?.chat_id ?? this.update.callback_query?.message?.chat.chat_id ?? '';
   }
 
   userID(): ID | '' {
-    return this.update.message?.sender?.user_id ?? this.update.callback_query?.from?.user_id ?? this.update.callback_query?.message?.sender?.user_id ?? '';
+    return this.message()?.sender?.user_id ?? this.update.callback_query?.from?.user_id ?? this.update.callback_query?.message?.sender?.user_id ?? '';
   }
 
   chatType(): string {
-    return this.update.message?.chat.type ?? this.update.callback_query?.chat?.type ?? this.update.callback_query?.message?.chat.type ?? '';
+    return this.message()?.chat.type ?? this.update.callback_query?.chat?.type ?? this.update.callback_query?.message?.chat.type ?? '';
   }
 
   meta<TValue = unknown>(key: string): TValue | undefined {

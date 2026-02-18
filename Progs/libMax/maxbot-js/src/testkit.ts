@@ -71,6 +71,28 @@ export function createMessageUpdate(input: {
   };
 }
 
+export function createEditedMessageUpdate(input: {
+  updateID?: number;
+  messageID?: ID;
+  chatID?: ID;
+  text?: string;
+  senderID?: ID;
+} = {}): Update {
+  const message: Message = {
+    message_id: input.messageID ?? 'm1',
+    chat: {
+      chat_id: input.chatID ?? 'chat1'
+    },
+    sender: input.senderID ? { user_id: input.senderID } : undefined,
+    text: input.text ?? ''
+  };
+
+  return {
+    update_id: input.updateID ?? 1,
+    edited_message: message
+  };
+}
+
 export function createCallbackUpdate(input: {
   updateID?: number;
   callbackID?: string;

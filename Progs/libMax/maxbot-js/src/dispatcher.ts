@@ -187,6 +187,28 @@ export class Dispatcher {
     this.router.callbackQueryFirst(arg1, arg2);
   }
 
+  editedMessage(handler: DispatchHandler): void;
+  editedMessage(filters: Filter[], handler: DispatchHandler): void;
+  editedMessage(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.editedMessage(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.editedMessage(arg1, arg2);
+  }
+
+  editedMessageFirst(handler: DispatchHandler): void;
+  editedMessageFirst(filters: Filter[], handler: DispatchHandler): void;
+  editedMessageFirst(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {
+    if (typeof arg1 === 'function') {
+      this.router.editedMessageFirst(arg1);
+      return;
+    }
+    if (!arg2) throw new Error('handler is required');
+    this.router.editedMessageFirst(arg1, arg2);
+  }
+
   any(handler: DispatchHandler): void;
   any(filters: Filter[], handler: DispatchHandler): void;
   any(arg1: Filter[] | DispatchHandler, arg2?: DispatchHandler): void {

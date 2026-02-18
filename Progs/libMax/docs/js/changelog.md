@@ -31,6 +31,7 @@
 - Added command mention filters (`commandAny`, `commandFor`).
 - Added batch update processing API (`handleUpdates`).
 - Improved callback-data helper with typed codecs and metadata injection from `filter(...)`.
+- Added dispatcher observer for edited messages (`editedMessage`, `editedMessageFirst`).
 
 ## v0.2.0 (2026-02-18)
 
