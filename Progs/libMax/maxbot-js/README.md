@@ -14,6 +14,7 @@ Status: `v0.2.0`.
 - Router-level error handlers (`onError`, bubbling across nested routers)
 - Data filters (`filters.regexMatch`, object-returning custom filters)
 - Structured command filter (`filters.commandMatch`) + `ctx.commandInfo()`
+- Built-in dispatch middleware helpers (`createThrottleMiddleware`)
 - Filters (`filters.command`, `filters.regex`, `filters.state`, etc.)
 - FSM storage (`MemoryFSMStorage`) with per-chat data
 - Inline keyboard builder and callback-data factory
@@ -141,6 +142,20 @@ dp.onError((error, ctx) => {
   console.error('dispatch error', error, 'chat', ctx.chatID());
   return true; // handled, do not rethrow
 });
+```
+
+## Throttle Middleware
+
+```ts
+dp.use(
+  createThrottleMiddleware({
+    limit: 3,
+    intervalMs: 1000,
+    onLimited: async (ctx, retryAfterMs) => {
+      await ctx.reply(`Too many requests, retry in ${retryAfterMs}ms`);
+    }
+  })
+);
 ```
 
 ## Scenes With Router Mount

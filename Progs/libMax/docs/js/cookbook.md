@@ -165,3 +165,15 @@ dp.message([filters.commandMatch('ban', 'cmd')], (ctx) => {
   return ctx.reply(`ban target=${args[0] ?? ''}`);
 });
 ```
+
+## 17. Throttle middleware
+
+```ts
+dp.use(
+  createThrottleMiddleware({
+    limit: 3,
+    intervalMs: 1000,
+    onLimited: (ctx, retryAfterMs) => ctx.reply(`retry in ${retryAfterMs}ms`)
+  })
+);
+```

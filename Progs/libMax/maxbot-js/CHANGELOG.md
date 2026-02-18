@@ -19,6 +19,7 @@ All notable changes to `maxbot-js` are documented in this file.
 - Added helpers: `filters.regexMatch(...)` and `filters.callbackDataMatch(...)`.
 - Added `ctx.commandInfo()` for structured command parsing (`name`, `mention`, `argsText`, `args`).
 - Added `filters.commandMatch(...)` to route by command and inject parsed command into metadata.
+- Exported middleware helpers with `createThrottleMiddleware(...)`.
 
 ## [v0.2.0] - 2026-02-18
 

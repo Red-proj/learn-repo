@@ -14,6 +14,7 @@ Status: `v0.2.0`
 - Router-level error handlers (`onError`)
 - Filters can emit metadata into context (`regexMatch` / object result)
 - Structured command parsing via `ctx.commandInfo()` and `filters.commandMatch(...)`
+- Middleware helper: `createThrottleMiddleware(...)`
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime

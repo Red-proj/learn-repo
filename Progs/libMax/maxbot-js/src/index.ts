@@ -11,5 +11,6 @@ export * from './dispatcher';
 export * from './dispatcher-router';
 export * from './fsm';
 export * from './scenes';
+export * from './middlewares';
 export * from './keyboard';
 export * from './callback-data';

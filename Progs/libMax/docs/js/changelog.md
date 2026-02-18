@@ -11,6 +11,7 @@
 - Router-level error handling via `onError(...)` with nested bubbling.
 - Filters can now emit metadata into `ctx.meta(...)` (`regexMatch`, object return).
 - Structured command parsing: `ctx.commandInfo()` and `filters.commandMatch(...)`.
+- Added middleware helper `createThrottleMiddleware(...)`.
 
 ## v0.2.0 (2026-02-18)
 
