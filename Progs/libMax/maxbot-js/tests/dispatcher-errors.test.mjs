@@ -57,3 +57,38 @@ test('unhandled error is rethrown by dispatcher', async () => {
     /no-handler/
   );
 });
+
+test('onError catches filter errors', async () => {
+  const dp = createDispatcher();
+  const seen = [];
+
+  const brokenFilter = () => {
+    throw new Error('filter-failed');
+  };
+
+  dp.message([brokenFilter], () => undefined);
+  dp.onError((error) => {
+    seen.push(String(error instanceof Error ? error.message : error));
+    return true;
+  });
+
+  await dp.handleUpdate(createMessageUpdate({ text: 'x' }));
+  assert.deepEqual(seen, ['filter-failed']);
+});
+
+test('onError catches useMeta resolver errors', async () => {
+  const dp = createDispatcher();
+  const seen = [];
+
+  dp.useMeta(() => {
+    throw new Error('meta-failed');
+  });
+  dp.message(() => undefined);
+  dp.onError((error) => {
+    seen.push(String(error instanceof Error ? error.message : error));
+    return true;
+  });
+
+  await dp.handleUpdate(createMessageUpdate({ text: 'x' }));
+  assert.deepEqual(seen, ['meta-failed']);
+});

@@ -21,6 +21,7 @@
 - Added polling lifecycle controls (`isPolling`, `stopLongPolling`).
 - Added dispatcher lifecycle hooks (`onStartup`, `onShutdown`, `startup`, `shutdown`).
 - Added polling recovery/backoff options for transient errors.
+- Improved `onError` to catch filter and `useMeta` resolver failures.
 
 ## v0.2.0 (2026-02-18)
 

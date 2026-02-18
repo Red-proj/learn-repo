@@ -241,6 +241,8 @@ dp.onError((error, ctx) => {
 });
 ```
 
+`onError` also catches failures from filters and metadata resolvers (`useMeta`).
+
 ## Throttle Middleware
 
 ```ts

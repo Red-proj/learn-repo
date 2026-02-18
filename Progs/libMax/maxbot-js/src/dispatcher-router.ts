@@ -105,30 +105,32 @@ export class DispatchRouter {
     const middlewares = [...inheritedMiddlewares, ...this.middlewares];
     const baseFilters = [...inheritedFilters, ...this.sharedFilters];
     const errorHandlers = [...inheritedErrorHandlers, ...this.errorHandlers];
-    const localMeta = await this.resolveMeta(ctx);
-    const scopedCtx = ctx.withMeta(localMeta);
 
-    for (const item of this.handlers) {
-      if (!matchesKind(item.kind, update)) continue;
-      if (!(await runFilters([...baseFilters, ...item.filters], scopedCtx))) continue;
-      try {
+    let scopedCtx = ctx;
+    try {
+      const localMeta = await this.resolveMeta(ctx);
+      scopedCtx = ctx.withMeta(localMeta);
+
+      for (const item of this.handlers) {
+        if (!matchesKind(item.kind, update)) continue;
+        if (!(await runFilters([...baseFilters, ...item.filters], scopedCtx))) continue;
         await runChain(middlewares, item.handler, scopedCtx);
         return true;
-      } catch (error) {
-        if (await runErrorHandlers(errorHandlers, error, scopedCtx)) {
+      }
+
+      for (const child of this.children) {
+        if (await child.dispatch(update, scopedCtx, middlewares, baseFilters, errorHandlers)) {
           return true;
         }
-        throw error;
       }
-    }
 
-    for (const child of this.children) {
-      if (await child.dispatch(update, scopedCtx, middlewares, baseFilters, errorHandlers)) {
+      return false;
+    } catch (error) {
+      if (await runErrorHandlers(errorHandlers, error, scopedCtx)) {
         return true;
       }
+      throw error;
     }
-
-    return false;
   }
 
   private add(kind: UpdateKind, arg1: Filter[] | DispatchHandler, arg2: DispatchHandler | undefined, prepend: boolean): void {

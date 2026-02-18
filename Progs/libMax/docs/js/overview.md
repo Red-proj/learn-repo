@@ -24,6 +24,7 @@ Status: `v0.2.0`
 - Polling lifecycle methods: `isPolling()`, `stopLongPolling(...)`
 - Dispatcher lifecycle hooks: `onStartup`, `onShutdown`
 - Polling recovery/backoff options for transient network failures
+- Error hooks also catch filter/useMeta failures
 - FSM context helpers (`setData/getData/updateData/clearData`)
 - Inline keyboard builder + callback-data factory
 - Long polling + webhook runtime
